@@ -59,16 +59,16 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden hero-interactive">
         <div className="absolute inset-0 gradient-bg opacity-10"></div>
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="animate-fade-in-up">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="gradient-text">Lalfakawma</span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 neuron-pulse">
+              <span className="gradient-text text-shimmer">Lalfakawma</span>
               <br />
               <span className="text-foreground">Vangchhia</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto floating-element">
               AI & Full-Stack Developer | Turning ideas into intelligent solutions
             </p>
             <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -78,14 +78,14 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 onClick={() => scrollToSection('projects')}
-                className="gradient-bg text-primary-foreground hover:opacity-90 px-8 py-3 text-lg"
+                className="gradient-bg text-primary-foreground hover:opacity-90 px-8 py-3 text-lg tech-glow floating-element"
               >
                 View My Work
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => scrollToSection('contact')}
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 text-lg"
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 text-lg tech-glow"
               >
                 Get In Touch
               </Button>
@@ -103,7 +103,7 @@ const Index = () => {
             </h2>
             
             <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              <Card className="bg-card border-border card-hover">
+              <Card className="bg-card border-border card-hover tech-glow">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Career Objective</h3>
                   <p className="text-muted-foreground leading-relaxed">
@@ -114,7 +114,7 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border card-hover">
+              <Card className="bg-card border-border card-hover tech-glow">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Core Strengths</h3>
                   <div className="space-y-3">
@@ -128,12 +128,12 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border card-hover md:col-span-2">
+              <Card className="bg-card border-border card-hover tech-glow md:col-span-2">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Personal Interests</h3>
                   <div className="flex flex-wrap gap-4">
                     {['Reading', 'Movies', 'Chess'].map((interest) => (
-                      <Badge key={interest} variant="secondary" className="px-4 py-2 text-sm">
+                      <Badge key={interest} variant="secondary" className="px-4 py-2 text-sm floating-element">
                         {interest}
                       </Badge>
                     ))}
@@ -176,7 +176,7 @@ const Index = () => {
                   achievement: "Secondary Education"
                 }
               ].map((edu, index) => (
-                <Card key={index} className="bg-card border-border card-hover">
+                <Card key={index} className="bg-card border-border card-hover tech-glow">
                   <CardContent className="p-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div>
@@ -224,15 +224,15 @@ const Index = () => {
                   skills: ["Full-Stack Development", "API Integration", "CI/CD"]
                 }
               ].map((category, index) => (
-                <Card key={index} className="bg-card border-border card-hover">
+                <Card key={index} className="bg-card border-border card-hover tech-glow skill-orbit">
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
-                      <category.icon className="w-8 h-8 text-primary mr-3" />
+                      <category.icon className="w-8 h-8 text-primary mr-3 floating-element" />
                       <h3 className="text-xl font-semibold gradient-text">{category.title}</h3>
                     </div>
                     <div className="space-y-2">
                       {category.skills.map((skill) => (
-                        <div key={skill} className="text-muted-foreground">{skill}</div>
+                        <div key={skill} className="text-muted-foreground hover:text-foreground transition-colors cursor-default">{skill}</div>
                       ))}
                     </div>
                   </CardContent>
@@ -269,9 +269,9 @@ const Index = () => {
                   tech: ["Django", "PostgreSQL", "Stripe", "E-commerce"]
                 }
               ].map((project, index) => (
-                <Card key={index} className="bg-card border-border card-hover group">
+                <Card key={index} className="bg-card border-border card-hover tech-glow group">
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-3 gradient-text group-hover:text-primary transition-colors">
+                    <h3 className="text-xl font-semibold mb-3 gradient-text group-hover:text-primary transition-colors text-shimmer">
                       {project.title}
                     </h3>
                     <p className="text-muted-foreground mb-4 leading-relaxed">
@@ -279,7 +279,7 @@ const Index = () => {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {project.tech.map((tech) => (
-                        <Badge key={tech} variant="secondary" className="text-xs">
+                        <Badge key={tech} variant="secondary" className="text-xs hover:bg-primary hover:text-primary-foreground transition-colors">
                           {tech}
                         </Badge>
                       ))}
@@ -301,7 +301,7 @@ const Index = () => {
             </h2>
             
             <div className="max-w-4xl mx-auto">
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border tech-glow">
                 <CardContent className="p-12 text-center">
                   <p className="text-xl text-muted-foreground mb-12">
                     Ready to collaborate on innovative AI solutions or discuss exciting opportunities? 
@@ -309,24 +309,24 @@ const Index = () => {
                   </p>
                   
                   <div className="grid md:grid-cols-3 gap-8">
-                    <a href="tel:8787698473" className="flex flex-col items-center space-y-4 card-hover p-6 rounded-lg">
-                      <Phone className="w-8 h-8 text-primary" />
+                    <a href="tel:8787698473" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
+                      <Phone className="w-8 h-8 text-primary floating-element" />
                       <div>
                         <p className="font-semibold">Phone</p>
                         <p className="text-muted-foreground">8787698473</p>
                       </div>
                     </a>
                     
-                    <a href="mailto:fakeavangchhia@gmail.com" className="flex flex-col items-center space-y-4 card-hover p-6 rounded-lg">
-                      <Mail className="w-8 h-8 text-primary" />
+                    <a href="mailto:fakeavangchhia@gmail.com" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
+                      <Mail className="w-8 h-8 text-primary floating-element" />
                       <div>
                         <p className="font-semibold">Email</p>
                         <p className="text-muted-foreground">fakeavangchhia@gmail.com</p>
                       </div>
                     </a>
                     
-                    <a href="#" className="flex flex-col items-center space-y-4 card-hover p-6 rounded-lg">
-                      <Linkedin className="w-8 h-8 text-primary" />
+                    <a href="#" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
+                      <Linkedin className="w-8 h-8 text-primary floating-element" />
                       <div>
                         <p className="font-semibold">LinkedIn</p>
                         <p className="text-muted-foreground">Connect with me</p>
@@ -336,7 +336,7 @@ const Index = () => {
                   
                   <div className="mt-12">
                     <Button 
-                      className="gradient-bg text-primary-foreground hover:opacity-90 px-8 py-3 text-lg"
+                      className="gradient-bg text-primary-foreground hover:opacity-90 px-8 py-3 text-lg tech-glow floating-element"
                       onClick={() => window.open('mailto:fakeavangchhia@gmail.com')}
                     >
                       Start a Conversation
