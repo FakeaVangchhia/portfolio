@@ -44,10 +44,10 @@ const Index = () => {
                 <button
                   key={item}
                   onClick={() => scrollToSection(item.toLowerCase())}
-                  className={`transition-colors ${
+                  className={`transition-all duration-300 font-medium px-3 py-2 rounded-lg ${
                     activeSection === item.toLowerCase()
-                      ? 'text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'text-primary bg-primary/10 shadow-lg shadow-primary/20'
+                      : 'text-readable hover:text-primary hover:bg-primary/5'
                   }`}
                 >
                   {item}
@@ -68,10 +68,10 @@ const Index = () => {
               <br />
               <span className="text-foreground">Vangchhia</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto floating-element">
+            <p className="text-xl md:text-2xl text-readable mb-8 max-w-3xl mx-auto floating-element font-medium">
               AI & Full-Stack Developer | Turning ideas into intelligent solutions
             </p>
-            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+            <p className="text-lg text-readable mb-12 max-w-2xl mx-auto">
               Adaptable team player with a Computer Science background, skilled in AI/ML, 
               Generative AI, and full-stack development.
             </p>
@@ -106,7 +106,7 @@ const Index = () => {
               <Card className="bg-card border-border card-hover tech-glow">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Career Objective</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-readable leading-relaxed text-base">
                     Passionate about solving complex problems with precision and building efficient 
                     AI/ML models and scalable applications. I thrive on transforming innovative 
                     ideas into practical, intelligent solutions that make a real difference.
@@ -120,8 +120,8 @@ const Index = () => {
                   <div className="space-y-3">
                     {['Adaptability', 'Active Listening', 'Creativity', 'Multi-tasking'].map((strength) => (
                       <div key={strength} className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                        <span className="text-foreground">{strength}</span>
+                        <div className="w-3 h-3 bg-primary rounded-full shadow-lg shadow-primary/50"></div>
+                        <span className="label-enhanced text-base">{strength}</span>
                       </div>
                     ))}
                   </div>
@@ -133,7 +133,7 @@ const Index = () => {
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Personal Interests</h3>
                   <div className="flex flex-wrap gap-4">
                     {['Reading', 'Movies', 'Chess'].map((interest) => (
-                      <Badge key={interest} variant="secondary" className="px-4 py-2 text-sm floating-element">
+                      <Badge key={interest} className="badge-enhanced px-4 py-2 text-sm floating-element font-medium">
                         {interest}
                       </Badge>
                     ))}
@@ -181,8 +181,8 @@ const Index = () => {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div>
                         <h3 className="text-2xl font-semibold gradient-text mb-2">{edu.degree}</h3>
-                        <p className="text-muted-foreground mb-2">{edu.institution}</p>
-                        <p className="text-foreground">{edu.achievement}</p>
+                        <p className="text-readable mb-2 text-base font-medium">{edu.institution}</p>
+                        <p className="label-enhanced text-sm">{edu.achievement}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -230,9 +230,9 @@ const Index = () => {
                       <category.icon className="w-8 h-8 text-primary mr-3 floating-element" />
                       <h3 className="text-xl font-semibold gradient-text">{category.title}</h3>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {category.skills.map((skill) => (
-                        <div key={skill} className="text-muted-foreground hover:text-foreground transition-colors cursor-default">{skill}</div>
+                        <div key={skill} className="text-readable hover:text-primary transition-colors cursor-default text-sm font-medium px-2 py-1 rounded hover:bg-primary/10">{skill}</div>
                       ))}
                     </div>
                   </CardContent>
@@ -274,12 +274,12 @@ const Index = () => {
                     <h3 className="text-xl font-semibold mb-3 gradient-text group-hover:text-primary transition-colors text-shimmer">
                       {project.title}
                     </h3>
-                    <p className="text-muted-foreground mb-4 leading-relaxed">
+                    <p className="text-readable mb-4 leading-relaxed text-sm">
                       {project.description}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {project.tech.map((tech) => (
-                        <Badge key={tech} variant="secondary" className="text-xs hover:bg-primary hover:text-primary-foreground transition-colors">
+                        <Badge key={tech} className="badge-enhanced text-xs">
                           {tech}
                         </Badge>
                       ))}
@@ -303,7 +303,7 @@ const Index = () => {
             <div className="max-w-4xl mx-auto">
               <Card className="bg-card border-border tech-glow">
                 <CardContent className="p-12 text-center">
-                  <p className="text-xl text-muted-foreground mb-12">
+                  <p className="text-xl text-readable mb-12 font-medium">
                     Ready to collaborate on innovative AI solutions or discuss exciting opportunities? 
                     Let's connect and build something amazing together.
                   </p>
@@ -312,24 +312,24 @@ const Index = () => {
                     <a href="tel:8787698473" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
                       <Phone className="w-8 h-8 text-primary floating-element" />
                       <div>
-                        <p className="font-semibold">Phone</p>
-                        <p className="text-muted-foreground">8787698473</p>
+                        <p className="label-enhanced text-lg">Phone</p>
+                        <p className="text-readable font-medium">8787698473</p>
                       </div>
                     </a>
                     
                     <a href="mailto:fakeavangchhia@gmail.com" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
                       <Mail className="w-8 h-8 text-primary floating-element" />
                       <div>
-                        <p className="font-semibold">Email</p>
-                        <p className="text-muted-foreground">fakeavangchhia@gmail.com</p>
+                        <p className="label-enhanced text-lg">Email</p>
+                        <p className="text-readable font-medium">fakeavangchhia@gmail.com</p>
                       </div>
                     </a>
                     
                     <a href="#" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
                       <Linkedin className="w-8 h-8 text-primary floating-element" />
                       <div>
-                        <p className="font-semibold">LinkedIn</p>
-                        <p className="text-muted-foreground">Connect with me</p>
+                        <p className="label-enhanced text-lg">LinkedIn</p>
+                        <p className="text-readable font-medium">Connect with me</p>
                       </div>
                     </a>
                   </div>

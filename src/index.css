@@ -7,40 +7,47 @@
   :root {
     /* Core brand colors - AI/Tech theme */
     --background: 216 27% 7%; /* Deep navy */
-    --foreground: 213 31% 91%;
+    --foreground: 213 31% 95%; /* Brighter for better contrast */
     
-    --card: 217 33% 9%;
-    --card-foreground: 213 31% 91%;
+    --card: 217 33% 12%; /* Slightly lighter for better contrast */
+    --card-foreground: 213 31% 95%;
     
-    --popover: 217 33% 9%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 217 33% 12%;
+    --popover-foreground: 213 31% 95%;
     
-    --primary: 217 91% 60%; /* Electric blue */
+    --primary: 217 91% 65%; /* Slightly brighter */
     --primary-foreground: 216 27% 7%;
     
-    --secondary: 216 19% 17%;
-    --secondary-foreground: 213 31% 91%;
+    --secondary: 216 19% 20%; /* Better contrast */
+    --secondary-foreground: 213 31% 95%;
     
-    --muted: 216 19% 17%;
-    --muted-foreground: 217 10% 64%;
+    --muted: 216 19% 20%;
+    --muted-foreground: 217 15% 75%; /* Much brighter for better readability */
     
-    --accent: 217 91% 60%;
+    --accent: 217 91% 65%;
     --accent-foreground: 216 27% 7%;
     
     --destructive: 0 84% 60%;
-    --destructive-foreground: 213 31% 91%;
+    --destructive-foreground: 213 31% 95%;
     
-    --border: 216 19% 17%;
-    --input: 216 19% 17%;
-    --ring: 217 91% 60%;
+    --border: 216 19% 25%; /* More visible borders */
+    --input: 216 19% 20%;
+    --ring: 217 91% 65%;
     
     --radius: 0.75rem;
     
     /* Custom portfolio colors */
-    --gradient-start: 217 91% 60%;
-    --gradient-end: 229 84% 65%;
-    --section-bg: 217 28% 8%;
-    --card-hover: 216 28% 11%;
+    --gradient-start: 217 91% 65%;
+    --gradient-end: 229 84% 70%;
+    --section-bg: 217 28% 10%; /* Slightly lighter */
+    --card-hover: 216 28% 15%; /* More prominent hover */
+    
+    /* Enhanced visibility tokens */
+    --text-high-contrast: 213 31% 98%;
+    --text-medium-contrast: 217 15% 85%;
+    --accent-glow: 217 91% 65%;
+    --success: 142 76% 36%;
+    --success-foreground: 213 31% 95%;
   }
   
   * {
@@ -70,7 +77,19 @@
   }
   
   .card-hover {
-    @apply transition-all duration-500 hover:bg-[hsl(var(--card-hover))] hover:scale-[1.05] hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2;
+    @apply transition-all duration-500 hover:bg-[hsl(var(--card-hover))] hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 hover:border-primary/50;
+  }
+  
+  .label-enhanced {
+    @apply text-[hsl(var(--text-high-contrast))] font-medium tracking-wide;
+  }
+  
+  .text-readable {
+    @apply text-[hsl(var(--text-medium-contrast))];
+  }
+  
+  .badge-enhanced {
+    @apply bg-primary/20 text-primary border border-primary/30 hover:bg-primary hover:text-primary-foreground transition-all duration-300;
   }
   
   .animate-fade-in-up {
