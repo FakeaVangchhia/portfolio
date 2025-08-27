@@ -59,7 +59,18 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden hero-interactive">
+      <section 
+        id="home" 
+        className="min-h-screen flex items-center justify-center relative overflow-hidden hero-interactive"
+        onMouseMove={(e) => {
+          const section = e.currentTarget;
+          const rect = section.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          section.style.setProperty('--mouse-x', `${x}%`);
+          section.style.setProperty('--mouse-y', `${y}%`);
+        }}
+      >
         <div className="absolute inset-0 gradient-bg opacity-10"></div>
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="animate-fade-in-up">
@@ -105,7 +116,7 @@ const Index = () => {
             <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
               <Card className="bg-card border-border card-hover tech-glow">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 gradient-text">Career Objective</h3>
+                  <h3 className="text-2xl font-semibold mb-6 text-primary">Career Objective</h3>
                   <p className="text-readable leading-relaxed text-base">
                     Passionate about solving complex problems with precision and building efficient 
                     AI/ML models and scalable applications. I thrive on transforming innovative 
@@ -116,7 +127,7 @@ const Index = () => {
 
               <Card className="bg-card border-border card-hover tech-glow">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 gradient-text">Core Strengths</h3>
+                  <h3 className="text-2xl font-semibold mb-6 text-primary">Core Strengths</h3>
                   <div className="space-y-3">
                     {['Adaptability', 'Active Listening', 'Creativity', 'Multi-tasking'].map((strength) => (
                       <div key={strength} className="flex items-center space-x-3">
@@ -130,7 +141,7 @@ const Index = () => {
 
               <Card className="bg-card border-border card-hover tech-glow md:col-span-2">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 gradient-text">Personal Interests</h3>
+                  <h3 className="text-2xl font-semibold mb-6 text-primary">Personal Interests</h3>
                   <div className="flex flex-wrap gap-4">
                     {['Reading', 'Movies', 'Chess'].map((interest) => (
                       <Badge key={interest} className="badge-enhanced px-4 py-2 text-sm floating-element font-medium">
@@ -180,7 +191,7 @@ const Index = () => {
                   <CardContent className="p-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div>
-                        <h3 className="text-2xl font-semibold gradient-text mb-2">{edu.degree}</h3>
+                        <h3 className="text-2xl font-semibold text-primary mb-2">{edu.degree}</h3>
                         <p className="text-readable mb-2 text-base font-medium">{edu.institution}</p>
                         <p className="label-enhanced text-sm">{edu.achievement}</p>
                       </div>
@@ -271,7 +282,7 @@ const Index = () => {
               ].map((project, index) => (
                 <Card key={index} className="bg-card border-border card-hover tech-glow group">
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-3 gradient-text group-hover:text-primary transition-colors text-shimmer">
+                    <h3 className="text-xl font-semibold mb-3 text-primary group-hover:text-primary-glow transition-colors text-shimmer">
                       {project.title}
                     </h3>
                     <p className="text-readable mb-4 leading-relaxed text-sm">
