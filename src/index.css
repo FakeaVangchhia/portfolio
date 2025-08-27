@@ -65,48 +65,7 @@
 
 @layer components {
   .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 700;
-    text-shadow: 0 0 30px hsl(var(--primary) / 0.5);
-    position: relative;
-  }
-  
-  .gradient-text::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: blur(10px);
-    z-index: -1;
-    opacity: 0.7;
-  }
-  
-  .premium-heading {
-    color: hsl(var(--foreground));
-    font-weight: 800;
-    text-shadow: 
-      0 0 10px hsl(var(--primary) / 0.8),
-      0 0 20px hsl(var(--primary) / 0.6),
-      0 0 30px hsl(var(--primary) / 0.4);
-    position: relative;
-    letter-spacing: 0.05em;
-  }
-  
-  .premium-heading::before {
-    content: '';
-    position: absolute;
-    inset: -5px;
-    background: linear-gradient(45deg, hsl(var(--primary) / 0.2), transparent, hsl(var(--primary) / 0.2));
-    border-radius: 8px;
-    z-index: -1;
-    animation: premiumGlow 3s ease-in-out infinite alternate;
+    @apply bg-gradient-to-r from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))] bg-clip-text text-transparent;
   }
   
   .gradient-bg {
@@ -122,17 +81,11 @@
   }
   
   .label-enhanced {
-    color: hsl(var(--foreground));
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-shadow: 0 0 15px hsl(var(--primary) / 0.6);
+    @apply text-[hsl(var(--text-high-contrast))] font-medium tracking-wide;
   }
   
   .text-readable {
-    color: hsl(var(--foreground));
-    font-weight: 500;
-    text-shadow: 0 0 8px hsl(var(--background) / 0.8);
-    line-height: 1.7;
+    @apply text-[hsl(var(--text-medium-contrast))];
   }
   
   .badge-enhanced {
@@ -320,19 +273,6 @@
   100% {
     opacity: 0;
     transform: rotate(360deg) translateX(30px) rotate(-360deg);
-  }
-
-  }
-}
-
-@keyframes premiumGlow {
-  0% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.6;
-    transform: scale(1.02);
   }
 }
 
