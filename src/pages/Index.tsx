@@ -103,7 +103,7 @@ const Index = () => {
             </h2>
             
             <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              <Card className="bg-card border-border card-hover tech-glow">
+              <Card className="bg-card border-border card-hover tech-glow neuron-pulse">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Career Objective</h3>
                   <p className="text-readable leading-relaxed text-base">
@@ -114,7 +114,7 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border card-hover tech-glow">
+              <Card className="bg-card border-border card-hover tech-glow neuron-pulse">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Core Strengths</h3>
                   <div className="space-y-3">
@@ -128,7 +128,7 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border card-hover tech-glow md:col-span-2">
+              <Card className="bg-card border-border card-hover tech-glow neuron-pulse md:col-span-2">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-semibold mb-6 gradient-text">Personal Interests</h3>
                   <div className="flex flex-wrap gap-4">
@@ -176,7 +176,7 @@ const Index = () => {
                   achievement: "Secondary Education"
                 }
               ].map((edu, index) => (
-                <Card key={index} className="bg-card border-border card-hover tech-glow">
+                <Card key={index} className="bg-card border-border card-hover tech-glow neuron-pulse">
                   <CardContent className="p-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div>
@@ -269,7 +269,7 @@ const Index = () => {
                   tech: ["Django", "PostgreSQL", "Stripe", "E-commerce"]
                 }
               ].map((project, index) => (
-                <Card key={index} className="bg-card border-border card-hover tech-glow group">
+                <Card key={index} className="bg-card border-border card-hover tech-glow neuron-pulse group">
                   <CardContent className="p-6">
                     <h3 className="text-xl font-semibold mb-3 gradient-text group-hover:text-primary transition-colors text-shimmer">
                       {project.title}
@@ -301,7 +301,7 @@ const Index = () => {
             </h2>
             
             <div className="max-w-4xl mx-auto">
-              <Card className="bg-card border-border tech-glow">
+              <Card className="bg-card border-border tech-glow neuron-pulse">
                 <CardContent className="p-12 text-center">
                   <p className="text-xl text-readable mb-12 font-medium">
                     Ready to collaborate on innovative AI solutions or discuss exciting opportunities? 
