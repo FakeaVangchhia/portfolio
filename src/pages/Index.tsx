@@ -7,6 +7,7 @@ import { Mail, Phone, Linkedin, ExternalLink, Code, Brain, Database, Wrench } fr
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +40,7 @@ const Index = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="gradient-text text-xl font-bold">LV</div>
+            {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8">
               {['Home', 'About', 'Education', 'Skills', 'Projects', 'Contact'].map((item) => (
                 <button
@@ -46,7 +48,45 @@ const Index = () => {
                   onClick={() => scrollToSection(item.toLowerCase())}
                   className={`transition-all duration-300 font-medium px-3 py-2 rounded-lg ${
                     activeSection === item.toLowerCase()
-                      ? 'text-primary bg-primary/10 shadow-lg shadow-primary/20'
+                      ? 'text-primary font-bold'
+                      : 'text-readable hover:text-primary hover:bg-primary/5'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                aria-label="Open menu"
+                className="p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                onClick={() => setMobileMenuOpen((open) => !open)}
+              >
+                {/* Hamburger Icon */}
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg animate-fade-in-up">
+            <div className="flex flex-col px-6 py-4 space-y-2">
+              {['Home', 'About', 'Education', 'Skills', 'Projects', 'Contact'].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    scrollToSection(item.toLowerCase());
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`transition-all duration-300 font-medium px-3 py-2 rounded-lg text-left ${
+                    activeSection === item.toLowerCase()
+                      ? 'text-primary font-bold'
                       : 'text-readable hover:text-primary hover:bg-primary/5'
                   }`}
                 >
@@ -55,7 +95,7 @@ const Index = () => {
               ))}
             </div>
           </div>
-        </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -109,14 +149,13 @@ const Index = () => {
       <section id="about" className="py-20 section-bg">
         <div className="container mx-auto px-6">
           <div className="animate-fade-in">
-            <h2 className="text-4xl font-bold text-center mb-16">
+            <h2 className="text-4xl font-bold text-center mb-16 ">
               About <span className="gradient-text">Me</span>
             </h2>
-            
             <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              <Card className="bg-card border-border card-hover tech-glow">
+              <Card className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 text-primary">Career Objective</h3>
+                  <h3 className="text-2xl font-semibold mb-6 text-danger">Career Objective</h3>
                   <p className="text-readable leading-relaxed text-base">
                     Passionate about solving complex problems with precision and building efficient 
                     AI/ML models and scalable applications. I thrive on transforming innovative 
@@ -125,9 +164,9 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border card-hover tech-glow">
+              <Card className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 text-primary">Core Strengths</h3>
+                  <h3 className="text-2xl font-semibold mb-6 text-danger">Core Strengths</h3>
                   <div className="space-y-3">
                     {['Adaptability', 'Active Listening', 'Creativity', 'Multi-tasking'].map((strength) => (
                       <div key={strength} className="flex items-center space-x-3">
@@ -139,12 +178,12 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border card-hover tech-glow md:col-span-2">
+              <Card className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2 md:col-span-2">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 text-primary">Personal Interests</h3>
+                  <h3 className="text-2xl font-semibold mb-6 text-danger">Personal Interests</h3>
                   <div className="flex flex-wrap gap-4">
                     {['Reading', 'Movies', 'Chess'].map((interest) => (
-                      <Badge key={interest} className="badge-enhanced px-4 py-2 text-sm floating-element font-medium">
+                      <Badge key={interest} className="badge-enhanced px-4 py-2 text-sm floating-element font-medium hover:text-white">
                         {interest}
                       </Badge>
                     ))}
@@ -164,8 +203,8 @@ const Index = () => {
               <span className="gradient-text">Education</span>
             </h2>
             
-            <div className="max-w-4xl mx-auto space-y-8">
-              {[
+            <div className="max-w-4xl mx-auto space-y-8 text-danger">
+              {[ 
                 {
                   degree: "M.C.A",
                   institution: "CMR University, Bangalore, Karnataka",
@@ -187,7 +226,10 @@ const Index = () => {
                   achievement: "Secondary Education"
                 }
               ].map((edu, index) => (
-                <Card key={index} className="bg-card border-border card-hover tech-glow">
+                <Card
+                  key={index}
+                  className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2"
+                >
                   <CardContent className="p-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div>
