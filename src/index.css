@@ -15,37 +15,37 @@
     --popover: 217 33% 12%;
     --popover-foreground: 213 31% 95%;
     
-    --primary: 217 91% 65%; /* Slightly brighter */
-    --primary-foreground: 216 27% 7%;
+    --primary: 270 100% 75%; /* Purple primary */
+    --primary-foreground: 0 0% 100%;
     
-    --secondary: 216 19% 20%; /* Better contrast */
-    --secondary-foreground: 213 31% 95%;
+    --secondary: 260 30% 25%; /* Purple secondary */
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 216 19% 20%;
-    --muted-foreground: 217 15% 75%; /* Much brighter for better readability */
+    --muted: 260 15% 25%;
+    --muted-foreground: 270 20% 85%; /* Much brighter for better readability */
     
-    --accent: 217 91% 65%;
-    --accent-foreground: 216 27% 7%;
+    --accent: 280 100% 70%;
+    --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 213 31% 95%;
     
     --border: 216 19% 25%; /* More visible borders */
     --input: 216 19% 20%;
-    --ring: 217 91% 65%;
+    --ring: 270 100% 75%;
     
     --radius: 0.75rem;
     
     /* Custom portfolio colors */
-    --gradient-start: 217 91% 65%;
-    --gradient-end: 229 84% 70%;
+    --gradient-start: 270 100% 75%;
+    --gradient-end: 280 100% 80%;
     --section-bg: 217 28% 10%; /* Slightly lighter */
     --card-hover: 216 28% 15%; /* More prominent hover */
     
     /* Enhanced visibility tokens */
-    --text-high-contrast: 213 31% 98%;
-    --text-medium-contrast: 217 15% 85%;
-    --accent-glow: 217 91% 65%;
+    --text-high-contrast: 0 0% 98%;
+    --text-medium-contrast: 0 0% 95%;
+    --accent-glow: 270 100% 75%;
     --success: 142 76% 36%;
     --success-foreground: 213 31% 95%;
   }
@@ -101,20 +101,39 @@
   }
   
   .hero-interactive {
-    @apply relative overflow-hidden;
+    @apply relative overflow-hidden cursor-none;
   }
   
   .hero-interactive::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, hsl(var(--primary) / 0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: neuronNetwork 20s linear infinite;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsl(var(--primary) / 0.15) 0%, transparent 25%),
+      radial-gradient(circle, hsl(var(--primary) / 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 30px 30px;
     pointer-events: none;
+    z-index: 1;
+    transition: all 0.1s ease;
+  }
+  
+  .hero-interactive::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 60%);
+    border-radius: 50%;
+    left: var(--mouse-x, 50%);
+    top: var(--mouse-y, 50%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2;
+    transition: all 0.1s ease;
+    filter: blur(1px);
   }
   
   .neuron-pulse {
