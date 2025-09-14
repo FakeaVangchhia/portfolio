@@ -39,7 +39,7 @@ const Index = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="gradient-text text-xl font-bold">LV</div>
+            <div className="gradient-text text-xl font-bold">FV</div>
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8">
               {['Home', 'About', 'Education', 'Skills', 'Projects', 'Contact'].map((item) => (
