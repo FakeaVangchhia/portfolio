@@ -42,7 +42,7 @@ const Index = () => {
             <div className="gradient-text text-xl font-bold">FV</div>
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8">
-              {['Home', 'About', 'Education', 'Skills', 'Projects', 'Contact'].map((item) => (
+              {['Home', 'About', 'Skills', 'Projects', 'Contact'].map((item) => (
                 <button
                   key={item}
                   onClick={() => scrollToSection(item.toLowerCase())}
@@ -195,7 +195,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Education Section */}
+      {/* Education Section 
       <section id="education" className="py-20">
         <div className="container mx-auto px-6">
           <div className="animate-fade-in">
@@ -244,7 +244,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section>*/}
 
       {/* Skills Section */}
       <section id="skills" className="py-20 section-bg">
@@ -378,7 +378,7 @@ const Index = () => {
                       </div>
                     </a>
                     
-                    <a href="#" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
+                    <a href="https://www.linkedin.com/in/fakeavangchhia/" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
                       <Linkedin className="w-8 h-8 text-primary floating-element" />
                       <div>
                         <p className="label-enhanced text-lg">LinkedIn</p>
@@ -388,12 +388,22 @@ const Index = () => {
                   </div>
                   
                   <div className="mt-12">
-                    <Button 
-                      className="gradient-bg text-primary-foreground hover:opacity-90 px-8 py-3 text-lg tech-glow floating-element"
-                      onClick={() => window.open('mailto:fakeavangchhia@gmail.com')}
-                    >
-                      Start a Conversation
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+                      <a
+                        href="/resume.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        type="application/pdf"
+                      >
+                        <Button 
+                          variant="outline"
+                          className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 text-lg tech-glow floating-element"
+                        >
+                          View Resume
+                        </Button>
+                      </a>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
