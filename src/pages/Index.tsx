@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Phone, Linkedin, ExternalLink, Code, Brain, Database, Wrench } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,6 +57,12 @@ const Index = () => {
                   {item}
                 </button>
               ))}
+              <button
+                onClick={() => navigate('/neural_visual')}
+                className="transition-all duration-300 font-medium px-3 py-2 rounded-lg text-readable hover:text-primary hover:bg-primary/5"
+              >
+                Neural Vision
+              </button>
             </div>
             {/* Mobile Menu Button */}
             <div className="md:hidden">
@@ -93,6 +101,12 @@ const Index = () => {
                   {item}
                 </button>
               ))}
+              <button
+                onClick={() => { navigate('/neural_visual'); setMobileMenuOpen(false); }}
+                className="transition-all duration-300 font-medium px-3 py-2 rounded-lg text-left text-readable hover:text-primary hover:bg-primary/5"
+              >
+                Neural Vision
+              </button>
             </div>
           </div>
         )}
