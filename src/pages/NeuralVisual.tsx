@@ -1,10 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
+const navItems = ["home", "capabilities", "projects", "assistant", "contact"];
 
 const NeuralVisual = () => {
+  const [activeSection] = useState("home");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<any>(null);
   const animationRef = useRef<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const goToSection = (sectionId: string) => {
+    navigate({ pathname: "/", hash: `#${sectionId}` });
+  };
 
   useEffect(() => {
     let scene: any;
@@ -313,7 +323,7 @@ const NeuralVisual = () => {
   }, []);
 
   return (
-    <div style={{ width: "100%", height: "100vh", position: 'relative', background: "radial-gradient(1200px 600px at var(--mouse-x,50%) var(--mouse-y,50%), rgba(124,58,237,0.25), transparent 60%)" }}
+    <div style={{ width: "100%", height: "100vh", position: "relative", background: "radial-gradient(1200px 600px at var(--mouse-x,50%) var(--mouse-y,50%), rgba(74,177,103,0.22), transparent 60%)" }}
       onMouseMove={(e) => {
         const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -322,24 +332,88 @@ const NeuralVisual = () => {
         (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}%`);
       }}
     >
-      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      <nav className="neon-nav-shell fixed left-1/2 top-4 z-50 w-[min(1120px,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl px-4 backdrop-blur-2xl">
+        <div className="flex items-center justify-between py-3 md:px-2">
+          <button onClick={() => navigate("/")} className="display-font text-lg font-semibold tracking-tight text-primary">
+            Fakea Vangchhia
+          </button>
+
+          <div className="neon-tabs hidden items-center gap-1 rounded-full p-1 md:flex">
+            {navItems.map((item) => (
+              <button
+                key={item}
+                onClick={() => goToSection(item)}
+                className={`neon-tab ${
+                  activeSection === item ? "neon-tab-active" : ""
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+            <Button onClick={() => navigate("/neural_visual")} className="h-9 rounded-full px-5">
+              Neural Vision
+            </Button>
+          </div>
+
+          <button
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground md:hidden"
+          >
+            Menu
+          </button>
+        </div>
+
+        {mobileMenuOpen && (
+          <div className="neon-tabs mb-2 mt-1 rounded-xl px-3 py-3 md:hidden">
+            <div className="flex flex-col gap-2">
+              {navItems.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    goToSection(item);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`rounded-md px-3 py-2 text-left text-sm font-medium capitalize transition-all ${
+                    activeSection === item
+                      ? "bg-primary/80 text-primary-foreground shadow-[0_0_14px_hsl(var(--primary)/0.45)]"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+              <Button
+                onClick={() => {
+                  navigate("/neural_visual");
+                  setMobileMenuOpen(false);
+                }}
+                className="mt-2"
+              >
+                Neural Vision
+              </Button>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      <div ref={containerRef} style={{ width: "100%", height: "100%", paddingTop: "92px" }} />
       <div
         ref={tooltipRef}
         style={{
-          position: 'absolute',
+          position: "absolute",
           left: 0,
           top: 0,
-          pointerEvents: 'none',
-          transform: 'translate(-9999px, -9999px)',
-          background: 'rgba(20,20,30,0.9)',
-          color: 'white',
-          padding: '6px 10px',
+          pointerEvents: "none",
+          transform: "translate(-9999px, -9999px)",
+          color: "hsl(142 28% 18%)",
+          padding: "6px 10px",
           borderRadius: 6,
-          border: '1px solid rgba(124,58,237,0.6)',
+          border: "1px solid rgba(74,177,103,0.55)",
           fontSize: 12,
           opacity: 0,
-          transition: 'opacity 120ms ease',
-          boxShadow: '0 2px 12px rgba(124,58,237,0.35)'
+          transition: "opacity 120ms ease",
+          backgroundColor: "rgba(233,248,230,0.92)",
+          boxShadow: "0 2px 12px rgba(74,177,103,0.25)"
         }}
       />
     </div>

@@ -1,438 +1,395 @@
-
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ArrowRight, BrainCircuit, Database, Linkedin, Mail, Phone, Sparkles, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Mail, Phone, Linkedin, ExternalLink, Code, Brain, Database, Wrench } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const navItems = ["home", "capabilities", "projects", "contact"];
+
+const capabilityItems = [
+  {
+    icon: BrainCircuit,
+    title: "Applied AI",
+    details: "LLM workflows, prompt engineering, and task-specific model integration for practical business outcomes.",
+  },
+  {
+    icon: Database,
+    title: "Backend Engineering",
+    details: "FastAPI and Django services designed for reliability, maintainability, and scale.",
+  },
+  {
+    icon: Workflow,
+    title: "Automation Systems",
+    details: "Event-driven automations with Redis queues, API orchestration, and CI/CD delivery pipelines.",
+  },
+];
+
+const projectItems = [
+  {
+    title: "Mobile CRM + Business Card Scanner",
+    summary: "React Native and FastAPI pipeline using OCR + PyTorch with around 95% extraction accuracy.",
+    stack: ["React Native", "FastAPI", "OpenCV", "PyTorch", "OCR"],
+  },
+  {
+    title: "Social Media Automation Platform",
+    summary: "Worker-based scheduler with Redis and Docker for reliable post batching and API throughput.",
+    stack: ["FastAPI", "Redis", "Docker", "CI/CD", "Facebook Graph"],
+  },
+  {
+    title: "Hotel Chawngthu Commerce Platform",
+    summary: "Django booking and e-commerce system with Stripe integration and measurable booking growth.",
+    stack: ["Django", "PostgreSQL", "Stripe", "Admin Dashboard"],
+  },
+];
+
+const GRID_SIZE = 44;
+const BUG_COUNT = 12;
+
+type GridBug = {
+  id: number;
+  x: number;
+  y: number;
+  delay: number;
+  size: number;
+  hue: number;
+  trail: number;
+  twinkle: number;
+};
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [gridBugs, setGridBugs] = useState<GridBug[]>([]);
+  const [gridBounds, setGridBounds] = useState({ cols: 0, rows: 0 });
+  const bugLayerRef = useRef<HTMLDivElement | null>(null);
+  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['home', 'about', 'education', 'skills', 'projects', 'contact'];
-      const currentSection = sections.find(section => {
+    const onScroll = () => {
+      const scrolledToBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8;
+      if (scrolledToBottom) {
+        setActiveSection("contact");
+        return;
+      }
+
+      for (const section of navItems) {
         const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
+        if (!element) continue;
+        const rect = element.getBoundingClientRect();
+        if (rect.top <= 130 && rect.bottom >= 130) {
+          setActiveSection(section);
+          break;
         }
-        return false;
-      });
-      if (currentSection) {
-        setActiveSection(currentSection);
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", onScroll);
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!location.hash) return;
+    const sectionId = location.hash.slice(1);
+    const scrollToHashTarget = () => {
+      const target = document.getElementById(sectionId);
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth" });
+      setActiveSection(sectionId);
+    };
+
+    // Wait one frame so section nodes are present after route transition.
+    const frame = requestAnimationFrame(scrollToHashTarget);
+    return () => cancelAnimationFrame(frame);
+  }, [location.hash]);
+
+  useEffect(() => {
+    const node = bugLayerRef.current;
+    if (!node) return;
+
+    const updateBounds = () => {
+      const cols = Math.max(4, Math.floor(node.clientWidth / GRID_SIZE));
+      const rows = Math.max(4, Math.floor(node.clientHeight / GRID_SIZE));
+      setGridBounds({ cols, rows });
+    };
+
+    updateBounds();
+    const observer = new ResizeObserver(updateBounds);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (gridBounds.cols === 0 || gridBounds.rows === 0) return;
+    setGridBugs(
+      Array.from({ length: BUG_COUNT }, (_, id) => ({
+        id,
+        x: Math.floor(Math.random() * gridBounds.cols),
+        y: Math.floor(Math.random() * gridBounds.rows),
+        delay: Math.random() * 1.2,
+        size: 7 + Math.random() * 4,
+        hue: Math.round(-8 + Math.random() * 28),
+        trail: 8 + Math.random() * 14,
+        twinkle: 1.3 + Math.random() * 1.8,
+      })),
+    );
+  }, [gridBounds.cols, gridBounds.rows]);
+
+  useEffect(() => {
+    if (!gridBugs.length || gridBounds.cols === 0 || gridBounds.rows === 0) return;
+
+    const timer = window.setInterval(() => {
+      setGridBugs((prev) =>
+        prev.map((bug) => {
+          if (Math.random() < 0.15) return bug;
+
+          const horizontal = Math.random() < 0.5;
+          const step = Math.random() < 0.5 ? -1 : 1;
+          let nextX = bug.x;
+          let nextY = bug.y;
+
+          if (horizontal) {
+            nextX = Math.min(Math.max(bug.x + step, 0), gridBounds.cols - 1);
+          } else {
+            nextY = Math.min(Math.max(bug.y + step, 0), gridBounds.rows - 1);
+          }
+
+          return { ...bug, x: nextX, y: nextY };
+        }),
+      );
+    }, 430);
+
+    return () => window.clearInterval(timer);
+  }, [gridBugs.length, gridBounds.cols, gridBounds.rows]);
+
   const scrollToSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="gradient-text text-xl font-bold">FV</div>
-            {/* Desktop Menu */}
-            <div className="hidden md:flex space-x-8">
-              {['Home', 'About', 'Skills', 'Projects', 'Contact'].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => scrollToSection(item.toLowerCase())}
-                  className={`transition-all duration-300 font-medium px-3 py-2 rounded-lg ${
-                    activeSection === item.toLowerCase()
-                      ? 'text-primary font-bold'
-                      : 'text-readable hover:text-primary hover:bg-primary/5'
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
+    <div className="min-h-screen text-foreground">
+      <nav className="neon-nav-shell fixed left-1/2 top-4 z-50 w-[min(1120px,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl px-4 backdrop-blur-2xl">
+        <div className="flex items-center justify-between py-3 md:px-2">
+          <button onClick={() => scrollToSection("home")} className="display-font text-lg font-semibold tracking-tight text-primary">
+            Fakea Vangchhia
+          </button>
+
+          <div className="neon-tabs hidden items-center gap-1 rounded-full p-1 md:flex">
+            {navItems.map((item) => (
               <button
-                onClick={() => navigate('/neural_visual')}
-                className="transition-all duration-300 font-medium px-3 py-2 rounded-lg text-readable hover:text-primary hover:bg-primary/5"
+                key={item}
+                onClick={() => scrollToSection(item)}
+                className={`neon-tab ${
+                  activeSection === item ? "neon-tab-active" : ""
+                }`}
               >
-                Neural Vision
+                {item}
               </button>
-            </div>
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <button
-                aria-label="Open menu"
-                className="p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                onClick={() => setMobileMenuOpen((open) => !open)}
-              >
-                {/* Hamburger Icon */}
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <line x1="3" y1="12" x2="21" y2="12" />
-                  <line x1="3" y1="18" x2="21" y2="18" />
-                </svg>
-              </button>
-            </div>
+            ))}
+            <Button onClick={() => navigate("/neural_visual")} className="h-9 rounded-full px-5">
+              Neural Vision
+            </Button>
           </div>
+
+          <button
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground md:hidden"
+          >
+            Menu
+          </button>
         </div>
-        {/* Mobile Menu Dropdown */}
+
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg animate-fade-in-up">
-            <div className="flex flex-col px-6 py-4 space-y-2">
-              {['Home', 'About', 'Education', 'Skills', 'Projects', 'Contact'].map((item) => (
+          <div className="neon-tabs mb-2 mt-1 rounded-xl px-3 py-3 md:hidden">
+            <div className="flex flex-col gap-2">
+              {navItems.map((item) => (
                 <button
                   key={item}
                   onClick={() => {
-                    scrollToSection(item.toLowerCase());
+                    scrollToSection(item);
                     setMobileMenuOpen(false);
                   }}
-                  className={`transition-all duration-300 font-medium px-3 py-2 rounded-lg text-left ${
-                    activeSection === item.toLowerCase()
-                      ? 'text-primary font-bold'
-                      : 'text-readable hover:text-primary hover:bg-primary/5'
+                  className={`rounded-md px-3 py-2 text-left text-sm font-medium capitalize transition-all ${
+                    activeSection === item
+                      ? "bg-primary/80 text-primary-foreground shadow-[0_0_14px_hsl(var(--primary)/0.45)]"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {item}
                 </button>
               ))}
-              <button
-                onClick={() => { navigate('/neural_visual'); setMobileMenuOpen(false); }}
-                className="transition-all duration-300 font-medium px-3 py-2 rounded-lg text-left text-readable hover:text-primary hover:bg-primary/5"
+              <Button
+                onClick={() => {
+                  navigate("/neural_visual");
+                  setMobileMenuOpen(false);
+                }}
+                className="mt-2"
               >
                 Neural Vision
-              </button>
+              </Button>
             </div>
           </div>
         )}
       </nav>
 
-      {/* Hero Section */}
-      <section 
-        id="home" 
-        className="min-h-screen flex items-center justify-center relative overflow-hidden hero-interactive"
-        onMouseMove={(e) => {
-          const section = e.currentTarget;
-          const rect = section.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
-          section.style.setProperty('--mouse-x', `${x}%`);
-          section.style.setProperty('--mouse-y', `${y}%`);
-        }}
-      >
-        <div className="absolute inset-0 gradient-bg opacity-10"></div>
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="animate-fade-in-up">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 neuron-pulse">
-              <span className="gradient-text text-shimmer">Lalfakawma</span>
-              <br />
-              <span className="text-foreground">Vangchhia</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-readable mb-8 max-w-3xl mx-auto floating-element font-medium">
-              AI & Full-Stack Developer | Turning ideas into intelligent solutions
-            </p>
-            <p className="text-lg text-readable mb-12 max-w-2xl mx-auto">
-              Adaptable team player with a Computer Science background, skilled in AI/ML, 
-              Generative AI, and full-stack development.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={() => scrollToSection('projects')}
-                className="gradient-bg text-primary-foreground hover:opacity-90 px-8 py-3 text-lg tech-glow floating-element"
-              >
-                View My Work
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => scrollToSection('contact')}
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 text-lg tech-glow"
-              >
-                Get In Touch
-              </Button>
-            </div>
+      <main className="container pt-36">
+        <section id="home" className="section-anchor relative overflow-hidden pb-20 pt-8 md:pb-24">
+          <div className="hero-grid pointer-events-none absolute inset-0" />
+          <div ref={bugLayerRef} className="hero-bug-layer pointer-events-none absolute inset-0">
+            {gridBugs.map((bug) => (
+              <span
+                key={bug.id}
+                className="hero-bug"
+                style={{
+                  left: `${bug.x * GRID_SIZE}px`,
+                  top: `${bug.y * GRID_SIZE}px`,
+                  animationDelay: `${bug.delay}s`,
+                  animationDuration: `${bug.twinkle}s`,
+                  ["--bug-size" as string]: `${bug.size}px`,
+                  ["--bug-hue" as string]: `${bug.hue}deg`,
+                  ["--bug-trail" as string]: `${bug.trail}px`,
+                }}
+              />
+            ))}
           </div>
-        </div>
-      </section>
+          <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="fade-in">
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                <Sparkles className="h-3.5 w-3.5" /> AI Engineer Portfolio
+              </p>
+              <h1 className="display-font mb-6 text-4xl font-semibold tracking-tight md:text-6xl">
+                Building dependable AI products, not just demos.
+              </h1>
+              <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+                I am Lalfakawma Vangchhia, an AI Engineer and full-stack developer focused on LLM-powered features,
+                robust APIs, and automation pipelines that ship to production.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button onClick={() => scrollToSection("projects")} className="rounded-full px-6">
+                  Explore Projects <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button onClick={() => scrollToSection("contact")} variant="outline" className="rounded-full px-6">
+                  Let&apos;s Collaborate
+                </Button>
+              </div>
+            </div>
 
-      {/* About Section */}
-      <section id="about" className="py-20 section-bg">
-        <div className="container mx-auto px-6">
-          <div className="animate-fade-in">
-            <h2 className="text-4xl font-bold text-center mb-16 ">
-              About <span className="gradient-text">Me</span>
-            </h2>
-            <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              <Card className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 text-danger">Career Objective</h3>
-                  <p className="text-readable leading-relaxed text-base">
-                    Passionate about solving complex problems with precision and building efficient 
-                    AI/ML models and scalable applications. I thrive on transforming innovative 
-                    ideas into practical, intelligent solutions that make a real difference.
-                  </p>
+            <Card className="glass-panel elevated-card fade-in">
+              <CardHeader className="pb-2">
+                <CardTitle className="display-font text-xl">Profile Snapshot</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div>
+                  <p className="text-sm text-muted-foreground">Specialization</p>
+                  <p className="font-medium">Generative AI, ML Integration, Backend Systems</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Core Stack</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {["FastAPI", "Django", "PyTorch", "Redis", "Docker", "React"].map((item) => (
+                      <span key={item} className="tag">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-1">
+                  <div className="rounded-xl border border-border/70 bg-card/70 p-4">
+                    <p className="display-font text-2xl text-primary">95%</p>
+                    <p className="text-xs text-muted-foreground">OCR extraction precision</p>
+                  </div>
+                  <div className="rounded-xl border border-border/70 bg-card/70 p-4">
+                    <p className="display-font text-2xl text-primary">30%</p>
+                    <p className="text-xs text-muted-foreground">booking uplift on platform work</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section id="capabilities" className="section-anchor py-12 md:py-16">
+          <div className="mb-8 flex items-center justify-between">
+            <h2 className="display-font text-3xl font-semibold tracking-tight md:text-4xl">Capabilities</h2>
+            <p className="max-w-md text-sm text-muted-foreground">From model orchestration to APIs and deployment workflows.</p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-3">
+            {capabilityItems.map((item) => (
+              <Card key={item.title} className="glass-panel elevated-card">
+                <CardContent className="pt-6">
+                  <item.icon className="mb-4 h-8 w-8 text-primary" />
+                  <h3 className="display-font mb-2 text-xl font-medium">{item.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{item.details}</p>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </section>
 
-              <Card className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 text-danger">Core Strengths</h3>
-                  <div className="space-y-3">
-                    {['Adaptability', 'Active Listening', 'Creativity', 'Multi-tasking'].map((strength) => (
-                      <div key={strength} className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-primary rounded-full shadow-lg shadow-primary/50"></div>
-                        <span className="label-enhanced text-base">{strength}</span>
-                      </div>
+        <section id="projects" className="section-anchor py-12 md:py-16">
+          <div className="mb-8">
+            <h2 className="display-font text-3xl font-semibold tracking-tight md:text-4xl">Selected Projects</h2>
+          </div>
+          <div className="space-y-4">
+            {projectItems.map((project) => (
+              <Card key={project.title} className="glass-panel elevated-card">
+                <CardContent className="flex flex-col gap-5 p-6 md:flex-row md:items-start md:justify-between">
+                  <div className="max-w-2xl">
+                    <h3 className="display-font text-xl font-medium">{project.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{project.summary}</p>
+                  </div>
+                  <div className="flex max-w-sm flex-wrap gap-2 md:justify-end">
+                    {project.stack.map((tech) => (
+                      <span key={tech} className="tag">
+                        {tech}
+                      </span>
                     ))}
                   </div>
                 </CardContent>
               </Card>
-
-              <Card className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2 md:col-span-2">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-semibold mb-6 text-danger">Personal Interests</h3>
-                  <div className="flex flex-wrap gap-4">
-                    {['Reading', 'Movies', 'Chess'].map((interest) => (
-                      <Badge key={interest} className="badge-enhanced px-4 py-2 text-sm floating-element font-medium hover:text-white">
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+        <section id="contact" className="section-anchor py-12 pb-20 md:py-16">
+          <Card className="glass-panel">
+            <CardContent className="grid gap-8 p-8 md:grid-cols-[1.15fr_0.85fr] md:p-10">
+              <div>
+                <h2 className="display-font text-3xl font-semibold tracking-tight md:text-4xl">Let&apos;s Build Something Valuable</h2>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
+                  Open to AI engineering, backend architecture, and product-focused roles where technical rigor and business impact both matter.
+                </p>
+                <div className="mt-6">
+                  <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="rounded-full px-6">
+                      View Resume
+                    </Button>
+                  </a>
+                </div>
+              </div>
 
-      {/* Education Section 
-      <section id="education" className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="animate-fade-in">
-            <h2 className="text-4xl font-bold text-center mb-16">
-              <span className="gradient-text">Education</span>
-            </h2>
-            
-            <div className="max-w-4xl mx-auto space-y-8 text-danger">
-              {[ 
-                {
-                  degree: "M.C.A",
-                  institution: "CMR University, Bangalore, Karnataka",
-                  achievement: "Advanced Computer Applications"
-                },
-                {
-                  degree: "B.C.A",
-                  institution: "Govt. Champhai College, Mizoram",
-                  achievement: "Silver Medalist • Valedictorian 2023 • State Silver Medal in Academics"
-                },
-                {
-                  degree: "12th Grade",
-                  institution: "Thenzawl Higher Secondary School, Mizoram",
-                  achievement: "Higher Secondary Education"
-                },
-                {
-                  degree: "10th Grade",
-                  institution: "Vantawng High School, Mizoram",
-                  achievement: "Secondary Education"
-                }
-              ].map((edu, index) => (
-                <Card
-                  key={index}
-                  className="bg-card border border-border transition-all duration-300 hover:border-primary/60 hover:shadow-[0_4px_32px_0_rgba(160,92,255,0.15)] hover:-translate-y-2"
-                >
-                  <CardContent className="p-8">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <h3 className="text-2xl font-semibold text-primary mb-2">{edu.degree}</h3>
-                        <p className="text-readable mb-2 text-base font-medium">{edu.institution}</p>
-                        <p className="label-enhanced text-sm">{edu.achievement}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>*/}
+              <div className="space-y-3">
+                <a href="mailto:fakeavangchhia@gmail.com" className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/75 p-4 transition hover:border-primary/40">
+                  <Mail className="h-5 w-5 text-primary" />
+                  <span className="text-sm">fakeavangchhia@gmail.com</span>
+                </a>
+                <a href="tel:8787698473" className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/75 p-4 transition hover:border-primary/40">
+                  <Phone className="h-5 w-5 text-primary" />
+                  <span className="text-sm">+91 8787698473</span>
+                </a>
+                <a href="https://www.linkedin.com/in/fakeavangchhia/" className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/75 p-4 transition hover:border-primary/40">
+                  <Linkedin className="h-5 w-5 text-primary" />
+                  <span className="text-sm">linkedin.com/in/fakeavangchhia</span>
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      </main>
 
-      {/* Skills Section */}
-      <section id="skills" className="py-20 section-bg">
-        <div className="container mx-auto px-6">
-          <div className="animate-fade-in">
-            <h2 className="text-4xl font-bold text-center mb-16">
-              Technical <span className="gradient-text">Skills</span>
-            </h2>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-              {[
-                {
-                  icon: Brain,
-                  title: "AI & ML",
-                  skills: ["Machine Learning", "Neural Networks", "Generative AI", "Prompt Engineering", "LLMs"]
-                },
-                {
-                  icon: Database,
-                  title: "Backend & Tools",
-                  skills: ["Django", "FastAPI", "Docker", "Postman", "Redis"]
-                },
-                {
-                  icon: Wrench,
-                  title: "Automation",
-                  skills: ["n8n", "Make.com"]
-                },
-                {
-                  icon: Code,
-                  title: "Other",
-                  skills: ["Full-Stack Development", "API Integration", "CI/CD"]
-                }
-              ].map((category, index) => (
-                <Card key={index} className="bg-card border-border card-hover tech-glow skill-orbit">
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      <category.icon className="w-8 h-8 text-primary mr-3 floating-element" />
-                      <h3 className="text-xl font-semibold gradient-text">{category.title}</h3>
-                    </div>
-                    <div className="space-y-3">
-                      {category.skills.map((skill) => (
-                        <div key={skill} className="text-readable hover:text-primary transition-colors cursor-default text-sm font-medium px-2 py-1 rounded hover:bg-primary/10">{skill}</div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="animate-fade-in">
-            <h2 className="text-4xl font-bold text-center mb-16">
-              Featured <span className="gradient-text">Projects</span>
-            </h2>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {[
-                {
-                  title: "Mobile CRM & Business-Card Scanner",
-                  description: "React Native + FastAPI + OCR system using OpenCV, Tesseract & PyTorch achieving 95% accuracy in business card data extraction.",
-                  tech: ["React Native", "FastAPI", "OpenCV", "PyTorch", "OCR"]
-                },
-                {
-                  title: "Social Media Automation",
-                  description: "FastAPI + Redis workers + Docker + CI/CD pipeline for scheduling and batching posts via Facebook Graph API.",
-                  tech: ["FastAPI", "Redis", "Docker", "CI/CD", "Facebook API"]
-                },
-                {
-                  title: "Hotel Chawngthu",
-                  description: "Django e-commerce & booking platform with PostgreSQL, Stripe integration, and admin dashboard. Increased bookings by 30%.",
-                  tech: ["Django", "PostgreSQL", "Stripe", "E-commerce"]
-                }
-              ].map((project, index) => (
-                <Card key={index} className="bg-card border-border card-hover tech-glow group">
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-3 text-primary group-hover:text-primary-glow transition-colors text-shimmer">
-                      {project.title}
-                    </h3>
-                    <p className="text-readable mb-4 leading-relaxed text-sm">
-                      {project.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech) => (
-                        <Badge key={tech} className="badge-enhanced text-xs">
-                          {tech}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-20 section-bg">
-        <div className="container mx-auto px-6">
-          <div className="animate-fade-in">
-            <h2 className="text-4xl font-bold text-center mb-16">
-              Get In <span className="gradient-text">Touch</span>
-            </h2>
-            
-            <div className="max-w-4xl mx-auto">
-              <Card className="bg-card border-border tech-glow">
-                <CardContent className="p-12 text-center">
-                  <p className="text-xl text-readable mb-12 font-medium">
-                    Ready to collaborate on innovative AI solutions or discuss exciting opportunities? 
-                    Let's connect and build something amazing together.
-                  </p>
-                  
-                  <div className="grid md:grid-cols-3 gap-8">
-                    <a href="tel:8787698473" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
-                      <Phone className="w-8 h-8 text-primary floating-element" />
-                      <div>
-                        <p className="label-enhanced text-lg">Phone</p>
-                        <p className="text-readable font-medium">8787698473</p>
-                      </div>
-                    </a>
-                    
-                    <a href="mailto:fakeavangchhia@gmail.com" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
-                      <Mail className="w-8 h-8 text-primary floating-element" />
-                      <div>
-                        <p className="label-enhanced text-lg">Email</p>
-                        <p className="text-readable font-medium">fakeavangchhia@gmail.com</p>
-                      </div>
-                    </a>
-                    
-                    <a href="https://www.linkedin.com/in/fakeavangchhia/" className="flex flex-col items-center space-y-4 card-hover tech-glow p-6 rounded-lg">
-                      <Linkedin className="w-8 h-8 text-primary floating-element" />
-                      <div>
-                        <p className="label-enhanced text-lg">LinkedIn</p>
-                        <p className="text-readable font-medium">Connect with me</p>
-                      </div>
-                    </a>
-                  </div>
-                  
-                  <div className="mt-12">
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-
-                      <a
-                        href="/resume.pdf"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        type="application/pdf"
-                      >
-                        <Button 
-                          variant="outline"
-                          className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 text-lg tech-glow floating-element"
-                        >
-                          View Resume
-                        </Button>
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 border-t border-border">
-        <div className="container mx-auto px-6 text-center">
-          <p className="text-muted-foreground">
-            © 2024 Lalfakawma Vangchhia. Built with passion for innovation.
-          </p>
-        </div>
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
+        Copyright 2026 Lalfakawma Vangchhia
       </footer>
     </div>
   );
