@@ -1,13 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { buildFeatureSpace, groupLabels } from "@/data/embedding-corpus";
 
 const navItems = ["home", "capabilities", "projects", "assistant", "contact"];
 
+// Must match the `palette` used for the point colours below.
+const legendSwatches = ["#000000", "#5a5a5a", "#9a9a9a"];
+
 const NeuralVisual = () => {
-  const [activeSection] = useState("home");
+  // No portfolio section is active here — this is its own route, so the section
+  // tabs stay unhighlighted and "Neural Vision" carries aria-current instead.
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
+
+  // Same feature space the scene builds, used to describe itself in the legend.
+  const corpusStats = useMemo(() => {
+    const { points, dimensions } = buildFeatureSpace();
+    return {
+      projects: points.filter((doc) => doc.group === 0).length,
+      technologies: points.filter((doc) => doc.group !== 0).length,
+      dimensions,
+    };
+  }, []);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<any>(null);
   const animationRef = useRef<number | null>(null);
@@ -15,6 +31,18 @@ const NeuralVisual = () => {
   const goToSection = (sectionId: string) => {
     navigate({ pathname: "/", hash: `#${sectionId}` });
   };
+
+  // Escape closes the mobile menu and returns focus to its trigger.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMobileMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     let scene: any;
@@ -25,6 +53,8 @@ const NeuralVisual = () => {
     let mouse: any;
     let hoveredIndex: number | null = null;
     let labels: string[] = [];
+    let details: string[] = [];
+    let groups: number[] = [];
     let positionsAttr: any;
     let colorsAttr: any;
     let group: any;
@@ -94,25 +124,13 @@ const NeuralVisual = () => {
       axes.material.needsUpdate = true;
       scene.add(axes);
 
-      const randn = () => {
-        let u = 0, v = 0;
-        while (u === 0) u = Math.random();
-        while (v === 0) v = Math.random();
-        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-      };
-
-      const categories = ["animals", "tech", "food", "sports"];
-      const N = 240;
-      const D = 8;
-      const data: number[][] = [];
-      labels = [];
-      const centers = categories.map((_, i) => Array.from({ length: D }, () => (i - 1.5) * 3 + randn() * 0.2));
-      for (let i = 0; i < N; i++) {
-        const c = Math.floor((i / N) * categories.length);
-        const vec = centers[c].map((v) => v + randn() * 0.9);
-        data.push(vec);
-        labels.push(`${categories[c]}_${i}`);
-      }
+      // Real corpus: the site's own technologies and projects, featurized into
+      // character-bigram term-frequency vectors. No synthetic points.
+      const { points: corpus, vectors: data } = buildFeatureSpace();
+      const N = corpus.length;
+      labels = corpus.map((doc) => doc.label);
+      details = corpus.map((doc) => doc.detail);
+      groups = corpus.map((doc) => doc.group);
 
       const centerData = (X: number[][]) => {
         const n = X.length, d = X[0].length;
@@ -151,7 +169,14 @@ const NeuralVisual = () => {
       const subMat = (A: number[][], B: number[][]) => A.map((row, i) => row.map((x, j) => x - B[i][j]));
 
       const powerIteration = (M: number[][], iters = 150) => {
-        let v = Array.from({ length: M.length }, () => Math.random() - 0.5);
+        // Deterministic start vector (fixed-seed LCG) so the same corpus always
+        // lands in the same place — a random seed made the layout jump on every
+        // page load, which reads as noise rather than structure.
+        let seed = 20260101;
+        let v = Array.from({ length: M.length }, () => {
+          seed = (seed * 1664525 + 1013904223) % 4294967296;
+          return seed / 4294967296 - 0.5;
+        });
         for (let k = 0; k < iters; k++) {
           const Mv = matVec(M, v);
           const nrm = norm(Mv) || 1;
@@ -192,23 +217,19 @@ const NeuralVisual = () => {
 
       const positions = new Float32Array(N * 3);
       const colors = new Float32Array(N * 3);
-      // Monochrome ramp: clusters separate by luminance instead of hue. The page
-      // behind this canvas is pure white, so the ramp has to stay in the dark
-      // half — anything past ~0x9a9a9a washes out against the background.
-      const palette = [0x000000, 0x454545, 0x757575, 0x9a9a9a];
+      // Monochrome ramp keyed to the document's group, not its index. The page
+      // behind this canvas is pure white, so the ramp stays in the dark half —
+      // anything past ~0x9a9a9a washes out against the background.
+      const palette = [0x000000, 0x5a5a5a, 0x9a9a9a];
       for (let i = 0; i < N; i++) {
         const p = proj[i];
         positions[i * 3 + 0] = nx(p[0]);
         positions[i * 3 + 1] = ny(p[1]);
         positions[i * 3 + 2] = nz(p[2]);
-        const cidx = Math.floor((i / N) * palette.length);
-        const col = palette[cidx];
-        const r = ((col >> 16) & 255) / 255;
-        const g = ((col >> 8) & 255) / 255;
-        const b = (col & 255) / 255;
-        colors[i * 3 + 0] = r;
-        colors[i * 3 + 1] = g;
-        colors[i * 3 + 2] = b;
+        const col = palette[groups[i]] ?? palette[palette.length - 1];
+        colors[i * 3 + 0] = ((col >> 16) & 255) / 255;
+        colors[i * 3 + 1] = ((col >> 8) & 255) / 255;
+        colors[i * 3 + 2] = (col & 255) / 255;
       }
 
       const geom = new THREE.BufferGeometry();
@@ -216,7 +237,9 @@ const NeuralVisual = () => {
       geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
       positionsAttr = geom.getAttribute('position');
       colorsAttr = geom.getAttribute('color');
-      const mat = new THREE.PointsMaterial({ size: 0.25, vertexColors: true });
+      // Far fewer points than the old synthetic cloud, so each one has to be
+      // big enough to aim at.
+      const mat = new THREE.PointsMaterial({ size: 1.1, vertexColors: true, sizeAttenuation: true });
       points = new THREE.Points(geom, mat);
 
       group = new THREE.Group();
@@ -224,6 +247,8 @@ const NeuralVisual = () => {
       scene.add(group);
 
       raycaster = new THREE.Raycaster();
+      // Default threshold is tuned for dense clouds; match it to the point size.
+      raycaster.params.Points.threshold = 0.9;
       mouse = new THREE.Vector2();
 
       const onPointerMove = (ev: MouseEvent) => {
@@ -278,7 +303,15 @@ const NeuralVisual = () => {
               if (tooltipRef.current) {
                 tooltipRef.current.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
                 tooltipRef.current.style.opacity = '1';
-                tooltipRef.current.textContent = `${labels[idx]}`;
+                tooltipRef.current.innerHTML = "";
+                const name = document.createElement("div");
+                name.style.fontWeight = "600";
+                name.textContent = labels[idx];
+                const detail = document.createElement("div");
+                detail.style.opacity = "0.65";
+                detail.style.marginTop = "2px";
+                detail.textContent = details[idx] ?? "";
+                tooltipRef.current.append(name, detail);
               }
             }
           } else if (tooltipRef.current) {
@@ -339,39 +372,49 @@ const NeuralVisual = () => {
         (e.currentTarget as HTMLElement).style.setProperty("--mouse-y", `${y}%`);
       }}
     >
-      <nav className="neon-nav-shell fixed left-1/2 top-4 z-50 w-[min(1120px,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl px-4 backdrop-blur-2xl">
+      <nav
+        aria-label="Primary"
+        className="neon-nav-shell fixed left-1/2 top-4 z-50 w-[min(1120px,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl px-4 backdrop-blur-2xl"
+      >
         <div className="flex items-center justify-between py-3 md:px-2">
-          <button onClick={() => navigate("/")} className="display-font text-lg font-semibold tracking-tight text-primary">
+          <button
+            onClick={() => navigate("/")}
+            className="display-font rounded-md text-lg font-semibold tracking-tight text-primary"
+          >
             Fakea Vangchhia
           </button>
 
           <div className="neon-tabs hidden items-center gap-1 rounded-full p-1 md:flex">
             {navItems.map((item) => (
-              <button
-                key={item}
-                onClick={() => goToSection(item)}
-                className={`neon-tab ${
-                  activeSection === item ? "neon-tab-active" : ""
-                }`}
-              >
+              <button key={item} onClick={() => goToSection(item)} className="neon-tab">
                 {item}
               </button>
             ))}
-            <Button onClick={() => navigate("/neural_visual")} className="h-9 rounded-full px-5">
+            <Button
+              onClick={() => navigate("/neural_visual")}
+              aria-current="page"
+              className="h-9 rounded-full px-5"
+            >
               Neural Vision
             </Button>
           </div>
 
           <button
+            ref={menuButtonRef}
             onClick={() => setMobileMenuOpen((v) => !v)}
-            className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground md:hidden"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="neural-mobile-menu"
+            className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary md:hidden"
           >
-            Menu
+            {mobileMenuOpen ? "Close" : "Menu"}
           </button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="neon-tabs mb-2 mt-1 rounded-xl px-3 py-3 md:hidden">
+          <div
+            id="neural-mobile-menu"
+            className="neon-tabs mb-2 mt-1 rounded-xl px-3 py-3 md:hidden"
+          >
             <div className="flex flex-col gap-2">
               {navItems.map((item) => (
                 <button
@@ -380,11 +423,7 @@ const NeuralVisual = () => {
                     goToSection(item);
                     setMobileMenuOpen(false);
                   }}
-                  className={`rounded-md px-3 py-2 text-left text-sm font-medium capitalize transition-all ${
-                    activeSection === item
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  className="rounded-md px-3 py-2 text-left text-sm font-medium capitalize text-muted-foreground transition-all hover:bg-background hover:text-foreground"
                 >
                   {item}
                 </button>
@@ -394,6 +433,7 @@ const NeuralVisual = () => {
                   navigate("/neural_visual");
                   setMobileMenuOpen(false);
                 }}
+                aria-current="page"
                 className="mt-2"
               >
                 Neural Vision
@@ -404,6 +444,34 @@ const NeuralVisual = () => {
       </nav>
 
       <div ref={containerRef} style={{ width: "100%", height: "100%", paddingTop: "92px" }} />
+
+      <aside className="glass-panel pointer-events-none absolute bottom-6 left-6 z-40 hidden max-w-xs rounded-2xl p-5 md:block">
+        <h1 className="display-font text-lg font-semibold tracking-tight">
+          Portfolio feature space
+        </h1>
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          Every point is a real entry from this site — {corpusStats.projects} projects and{" "}
+          {corpusStats.technologies} technologies. Their text is featurized into{" "}
+          {corpusStats.dimensions}-dimensional character-bigram vectors, then projected to
+          3D with PCA computed in the browser. Technologies that share a project
+          share its text, so they land near each other.
+        </p>
+        <ul className="mt-4 space-y-2">
+          {([0, 1, 2] as const).map((group) => (
+            <li key={group} className="flex items-center gap-2.5 text-xs text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: legendSwatches[group] }}
+              />
+              {groupLabels[group]}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-[0.7rem] text-muted-foreground/70">
+          Drag to orbit · scroll to zoom · hover a point for its label
+        </p>
+      </aside>
       <div
         ref={tooltipRef}
         style={{

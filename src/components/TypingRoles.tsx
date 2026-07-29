@@ -51,7 +51,14 @@ const TypingRoles = ({ roles, className }: TypingRolesProps) => {
   }
 
   return (
-    <span className={`type-caret ${className ?? ""}`.trim()}>{text}</span>
+    <>
+      {/* The animated span is decorative — read letter by letter it is noise —
+          so assistive tech gets the full list once instead. */}
+      <span aria-hidden="true" className={`type-caret ${className ?? ""}`.trim()}>
+        {text}
+      </span>
+      <span className="sr-only">{roles.join(" ")}</span>
+    </>
   );
 };
 

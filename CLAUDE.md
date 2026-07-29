@@ -36,9 +36,13 @@ catch-all.
 
 `Index.tsx` (~600 lines) is the whole site. Portfolio copy is hardcoded in
 module-level arrays at the top of the file — `navItems`, `stats`,
-`capabilityItems`, `techStack`, `projectItems`, `processSteps`. Editing portfolio
-content means editing those arrays, not chasing a CMS or data file. `navItems`
-doubles as the scroll-spy list, so each entry must match a section's `id`.
+`capabilityItems`, `processSteps`, `suggestedQuestions`. Editing portfolio
+content means editing those arrays, not chasing a CMS. `navItems` doubles as the
+scroll-spy list, so each entry must match a section's `id`.
+
+Two arrays live in `src/data/portfolio.ts` instead, because `NeuralVisual` also
+consumes them: `techStack` and `projectItems`. Edit them there — a second copy
+would silently desynchronise the 3D page from the site it claims to describe.
 
 Cross-page navigation back to a section uses a hash: `/neural_visual` calls
 `navigate({ pathname: "/", hash: "#projects" })`, and `Index` has a `location.hash`
@@ -94,6 +98,27 @@ This page loads three.js at runtime by injecting a `<script>` tag pointing at
 jsDelivr, then reads `window.THREE`. three.js is **not** an npm dependency and
 everything is typed `any`. It needs network access to render, and the imperative
 setup/teardown all lives inside one `useEffect`.
+
+**Everything it plots is real.** The scene used to scatter 240 random Gaussian
+vectors labelled `animals_0`/`tech_57`; it now projects the actual portfolio:
+
+- `src/lib/featurize.ts` — character-bigram bag-of-n-grams with an L2 norm and a
+  `min_df` cutoff. Pure and deterministic.
+- `src/data/embedding-corpus.ts` — `buildFeatureSpace()` turns `techStack` and
+  `projectItems` into 19 labelled vectors. A technology's vector is a 50/50
+  blend (`IDENTITY_WEIGHT`) of its own name and the centroid of the projects
+  listing it, so real co-occurrence becomes real proximity. Weight it toward
+  context and the points collapse onto their project; toward identity and the
+  plot degenerates into string similarity.
+- The PCA in the page (centering → covariance → power iteration with deflation)
+  was always real and is unchanged, except the start vector is now a fixed-seed
+  LCG so the layout is reproducible between loads.
+
+Because the featurizer is character-level, some proximity is plain string
+overlap rather than semantics — `OpenAI`/`OpenCV` sit at 0.52 cosine mostly on
+the shared `open`. That is honest behaviour for this representation, not a bug.
+If you add a technology used by no listed project, it keeps its bare name vector
+and lands in the sparse outer region.
 
 ### shadcn/ui
 

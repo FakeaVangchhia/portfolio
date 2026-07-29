@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -7,6 +7,7 @@ import {
   Compass,
   Cpu,
   Database,
+  ExternalLink,
   FlaskConical,
   Linkedin,
   Mail,
@@ -21,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChatbotPanel from "@/components/ChatbotPanel";
 import NeuralBackground from "@/components/NeuralBackground";
 import TypingRoles from "@/components/TypingRoles";
+import { projectItems, techStack } from "@/data/portfolio";
 import {
   useCountUp,
   useScrollProgress,
@@ -64,44 +66,10 @@ const capabilityItems = [
   },
 ];
 
-const techStack = [
-  "Python",
-  "FastAPI",
-  "Django",
-  "PyTorch",
-  "LangChain",
-  "OpenAI",
-  "Gemini",
-  "RAG",
-  "Redis",
-  "Docker",
-  "PostgreSQL",
-  "React",
-  "TypeScript",
-  "OpenCV",
-  "Vector DBs",
-  "CI/CD",
-];
-
-const projectItems = [
-  {
-    title: "Mobile CRM + Business Card Scanner",
-    summary:
-      "React Native and FastAPI pipeline using OCR + PyTorch with around 95% extraction accuracy.",
-    stack: ["React Native", "FastAPI", "OpenCV", "PyTorch", "OCR"],
-  },
-  {
-    title: "Social Media Automation Platform",
-    summary:
-      "Worker-based scheduler with Redis and Docker for reliable post batching and API throughput.",
-    stack: ["FastAPI", "Redis", "Docker", "CI/CD", "Facebook Graph"],
-  },
-  {
-    title: "Hotel Chawngthu Commerce Platform",
-    summary:
-      "Django booking and e-commerce system with Stripe integration and measurable booking growth.",
-    stack: ["Django", "PostgreSQL", "Stripe", "Admin Dashboard"],
-  },
+const suggestedQuestions = [
+  "What is your strongest AI project?",
+  "Which backend frameworks do you use?",
+  "How do you deploy models to production?",
 ];
 
 const processSteps = [
@@ -133,10 +101,20 @@ const processSteps = [
 
 const Counter = ({ value, suffix }: { value: number; suffix: string }) => {
   const { ref, value: current } = useCountUp(value);
+  // Screen readers get the settled figure; only sighted users see it tick up.
   return (
-    <span ref={ref} className="display-font text-4xl font-semibold text-primary md:text-5xl">
-      {current}
-      {suffix}
+    <span
+      ref={ref}
+      className="display-font text-4xl font-semibold tracking-tight text-primary md:text-5xl"
+    >
+      <span aria-hidden="true">
+        {current}
+        {suffix}
+      </span>
+      <span className="sr-only">
+        {value}
+        {suffix}
+      </span>
     </span>
   );
 };
@@ -145,6 +123,9 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showTop, setShowTop] = useState(false);
+  // Question handed to the assistant panel when a suggestion chip is clicked.
+  const [pendingQuestion, setPendingQuestion] = useState("");
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const scrollProgress = useScrollProgress();
@@ -179,6 +160,19 @@ const Index = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close the mobile menu on Escape and restore focus to its trigger, so a
+  // keyboard user is never stranded inside a dismissed panel.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMobileMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileMenuOpen]);
+
   useEffect(() => {
     if (!location.hash) return;
     const sectionId = location.hash.slice(1);
@@ -200,6 +194,9 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen text-foreground">
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
       <div
         className="scroll-progress"
         style={{ transform: `scaleX(${scrollProgress})` }}
@@ -207,11 +204,14 @@ const Index = () => {
       />
       <NeuralBackground />
 
-      <nav className="neon-nav-shell fixed left-1/2 top-4 z-50 w-[min(1120px,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl px-4 backdrop-blur-2xl">
+      <nav
+        aria-label="Primary"
+        className="neon-nav-shell fixed left-1/2 top-4 z-50 w-[min(1120px,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl px-4 backdrop-blur-2xl"
+      >
         <div className="flex items-center justify-between py-3 md:px-2">
           <button
             onClick={() => scrollToSection("home")}
-            className="display-font text-lg font-semibold tracking-tight text-primary"
+            className="display-font rounded-md text-lg font-semibold tracking-tight text-primary"
           >
             Fakea Vangchhia
           </button>
@@ -221,6 +221,7 @@ const Index = () => {
               <button
                 key={item}
                 onClick={() => scrollToSection(item)}
+                aria-current={activeSection === item ? "true" : undefined}
                 className={`neon-tab ${activeSection === item ? "neon-tab-active" : ""}`}
               >
                 {item}
@@ -235,15 +236,18 @@ const Index = () => {
           </div>
 
           <button
+            ref={menuButtonRef}
             onClick={() => setMobileMenuOpen((v) => !v)}
-            className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground md:hidden"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
+            className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary md:hidden"
           >
-            Menu
+            {mobileMenuOpen ? "Close" : "Menu"}
           </button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="neon-tabs mb-2 mt-1 rounded-xl px-3 py-3 md:hidden">
+          <div id="mobile-menu" className="neon-tabs mb-2 mt-1 rounded-xl px-3 py-3 md:hidden">
             <div className="flex flex-col gap-2">
               {navItems.map((item) => (
                 <button
@@ -252,10 +256,11 @@ const Index = () => {
                     scrollToSection(item);
                     setMobileMenuOpen(false);
                   }}
+                  aria-current={activeSection === item ? "true" : undefined}
                   className={`rounded-md px-3 py-2 text-left text-sm font-medium capitalize transition-all ${
                     activeSection === item
                       ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:bg-background hover:text-foreground"
                   }`}
                 >
                   {item}
@@ -275,7 +280,8 @@ const Index = () => {
         )}
       </nav>
 
-      <main className="container pt-36">
+      {/* tabIndex is what actually moves focus here when the skip link fires. */}
+      <main id="main" tabIndex={-1} className="container pt-36 focus:outline-none">
         {/* Hero */}
         <section
           id="home"
@@ -383,11 +389,18 @@ const Index = () => {
         </section>
 
         {/* Capabilities */}
-        <section id="capabilities" className="section-anchor py-12 md:py-16">
+        <section
+          id="capabilities"
+          className="section-anchor py-12 md:py-16"
+          aria-labelledby="capabilities-heading"
+        >
           <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div data-reveal>
               <p className="section-eyebrow mb-3">What I do</p>
-              <h2 className="display-font text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2
+                id="capabilities-heading"
+                className="display-font text-3xl font-semibold tracking-tight md:text-4xl"
+              >
                 Capabilities
               </h2>
             </div>
@@ -418,9 +431,11 @@ const Index = () => {
         </section>
 
         {/* Tech stack marquee */}
-        <section className="py-6" data-reveal>
+        <section className="py-6" data-reveal aria-label="Technology toolbox">
           <p className="section-eyebrow mb-5">Toolbox</p>
-          <div className="marquee overflow-hidden">
+          {/* The track is duplicated to loop seamlessly; the whole thing is
+              decorative, so the real list is exposed to assistive tech instead. */}
+          <div className="marquee overflow-hidden" aria-hidden="true">
             <div className="marquee-track">
               {[...techStack, ...techStack].map((tech, i) => (
                 <span key={`${tech}-${i}`} className="marquee-chip">
@@ -430,15 +445,30 @@ const Index = () => {
               ))}
             </div>
           </div>
+          <ul className="sr-only">
+            {techStack.map((tech) => (
+              <li key={tech}>{tech}</li>
+            ))}
+          </ul>
         </section>
 
         {/* Projects */}
-        <section id="projects" className="section-anchor py-12 md:py-16">
+        <section
+          id="projects"
+          className="section-anchor py-12 md:py-16"
+          aria-labelledby="projects-heading"
+        >
           <div className="mb-8" data-reveal>
             <p className="section-eyebrow mb-3">Work</p>
-            <h2 className="display-font text-3xl font-semibold tracking-tight md:text-4xl">
-              Selected Projects
-            </h2>
+            <div className="flex items-center gap-5">
+              <h2
+                id="projects-heading"
+                className="display-font text-3xl font-semibold tracking-tight md:text-4xl"
+              >
+                Selected Projects
+              </h2>
+              <span className="section-rule" aria-hidden="true" />
+            </div>
           </div>
           <div className="space-y-4">
             {projectItems.map((project, i) => (
@@ -448,27 +478,30 @@ const Index = () => {
                 data-reveal
                 style={{ ["--reveal-delay" as string]: `${i * 110}ms` }}
               >
-                <CardContent className="flex flex-col gap-5 p-6 md:flex-row md:items-start md:justify-between">
-                  <div className="max-w-2xl">
-                    <div className="flex items-center gap-3">
-                      <span className="display-font text-sm font-semibold text-primary/70">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <h3 className="display-font text-xl font-medium">
+                <CardContent className="flex flex-col gap-5 p-6 md:flex-row md:items-start md:justify-between md:gap-8">
+                  <div className="flex max-w-2xl gap-4">
+                    <span
+                      className="display-font pt-1 text-sm font-semibold tabular-nums text-muted-foreground"
+                      aria-hidden="true"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <h3 className="display-font text-xl font-medium leading-snug">
                         {project.title}
                       </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {project.summary}
+                      </p>
                     </div>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {project.summary}
-                    </p>
                   </div>
-                  <div className="flex max-w-sm flex-wrap gap-2 md:justify-end">
+                  <ul className="flex max-w-sm flex-wrap gap-2 md:justify-end">
                     {project.stack.map((tech) => (
-                      <span key={tech} className="tag">
+                      <li key={tech} className="tag">
                         {tech}
-                      </span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </CardContent>
               </Card>
             ))}
@@ -507,13 +540,20 @@ const Index = () => {
         </section>
 
         {/* AI Assistant */}
-        <section id="assistant" className="section-anchor py-12 md:py-16">
+        <section
+          id="assistant"
+          className="section-anchor py-12 md:py-16"
+          aria-labelledby="assistant-heading"
+        >
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div data-reveal="left">
               <p className="section-eyebrow mb-3">
-                <BrainCircuit className="h-3.5 w-3.5" /> Live demo
+                <BrainCircuit className="h-3.5 w-3.5" aria-hidden="true" /> Live demo
               </p>
-              <h2 className="display-font text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2
+                id="assistant-heading"
+                className="display-font text-3xl font-semibold tracking-tight md:text-4xl"
+              >
                 Talk to my AI assistant
               </h2>
               <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">
@@ -521,67 +561,87 @@ const Index = () => {
                 wired to a live LLM backend and answers about my projects, skills,
                 and experience — a small showcase of the kind of AI features I build.
               </p>
-              <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
-                {[
-                  "What is your strongest AI project?",
-                  "Which backend frameworks do you use?",
-                  "How do you deploy models to production?",
-                ].map((q) => (
-                  <li key={q} className="flex items-center gap-2">
-                    <ArrowRight className="h-3.5 w-3.5 text-primary" />
-                    {q}
+              <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Try asking
+              </p>
+              <ul className="mt-3 space-y-2">
+                {suggestedQuestions.map((q) => (
+                  <li key={q}>
+                    <button
+                      type="button"
+                      onClick={() => setPendingQuestion(q)}
+                      className="link-row w-full text-left text-sm"
+                    >
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-primary" />
+                      <span>{q}</span>
+                    </button>
                   </li>
                 ))}
               </ul>
             </div>
             <div data-reveal="right">
-              <ChatbotPanel />
+              <ChatbotPanel
+                pendingQuestion={pendingQuestion}
+                onPendingQuestionUsed={() => setPendingQuestion("")}
+              />
             </div>
           </div>
         </section>
 
         {/* Contact */}
-        <section id="contact" className="section-anchor py-12 pb-20 md:py-16">
+        <section
+          id="contact"
+          className="section-anchor py-12 pb-20 md:py-16"
+          aria-labelledby="contact-heading"
+        >
           <Card className="glass-panel" data-reveal>
             <CardContent className="grid gap-8 p-8 md:grid-cols-[1.15fr_0.85fr] md:p-10">
               <div>
-                <h2 className="display-font text-3xl font-semibold tracking-tight md:text-4xl">
+                <h2
+                  id="contact-heading"
+                  className="display-font text-3xl font-semibold tracking-tight md:text-4xl"
+                >
                   Let&apos;s Build Something Valuable
                 </h2>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
                   Open to AI engineering, backend architecture, and product-focused
                   roles where technical rigor and business impact both matter.
                 </p>
-                <div className="mt-6">
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <a href="mailto:fakeavangchhia@gmail.com">
+                    <Button className="rounded-full px-6">
+                      Get in touch
+                      <Mail className="ml-2 h-4 w-4" />
+                    </Button>
+                  </a>
                   <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="rounded-full px-6">
                       View Resume
+                      <ExternalLink className="ml-2 h-4 w-4" />
                     </Button>
                   </a>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <a
-                  href="mailto:fakeavangchhia@gmail.com"
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
-                >
-                  <Mail className="h-5 w-5 text-primary" />
+                <a href="mailto:fakeavangchhia@gmail.com" className="link-row">
+                  <Mail className="h-5 w-5 shrink-0 text-primary" />
                   <span className="text-sm">fakeavangchhia@gmail.com</span>
                 </a>
-                <a
-                  href="tel:8787698473"
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
-                >
-                  <Phone className="h-5 w-5 text-primary" />
+                <a href="tel:+918787698473" className="link-row">
+                  <Phone className="h-5 w-5 shrink-0 text-primary" />
                   <span className="text-sm">+91 8787698473</span>
                 </a>
                 <a
                   href="https://www.linkedin.com/in/fakeavangchhia/"
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-row"
                 >
-                  <Linkedin className="h-5 w-5 text-primary" />
+                  <Linkedin className="h-5 w-5 shrink-0 text-primary" />
                   <span className="text-sm">linkedin.com/in/fakeavangchhia</span>
+                  <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <span className="sr-only">(opens in a new tab)</span>
                 </a>
               </div>
             </CardContent>
@@ -589,14 +649,19 @@ const Index = () => {
         </section>
       </main>
 
-      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        Copyright 2026 Lalfakawma Vangchhia · Built with React, Tailwind &amp; a
-        little neural flair.
+      <footer className="border-t border-border">
+        <div className="container flex flex-col items-center justify-between gap-3 py-8 text-xs text-muted-foreground sm:flex-row">
+          <p>© 2026 Lalfakawma Vangchhia</p>
+          <p>Built with React, Tailwind &amp; a little neural flair.</p>
+        </div>
       </footer>
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Back to top"
+        // Hidden state must leave the tab order, not just fade out.
+        tabIndex={showTop ? 0 : -1}
+        aria-hidden={!showTop}
         className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-[0_4px_16px_hsl(var(--foreground)/0.12)] backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:bg-secondary ${
           showTop ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
         }`}

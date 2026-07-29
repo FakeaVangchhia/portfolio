@@ -42,6 +42,9 @@
 
   html {
     scroll-behavior: smooth;
+    /* Firefox scrollbar; the ::-webkit- rules below cover Chromium/Safari. */
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--foreground) / 0.22) transparent;
   }
 
   body {
@@ -49,6 +52,44 @@
     font-family: 'IBM Plex Sans', sans-serif;
     /* Flat white page — no tinted washes. */
     min-height: 100vh;
+  }
+
+  /* A flat monochrome design strips away the usual affordances, so the keyboard
+     focus ring has to be explicit and consistent everywhere. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--foreground));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: hsl(0 0% 85%);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--foreground) / 0.2);
+    border-radius: 999px;
+    /* Transparent-looking inset so the thumb reads as a slim pill. */
+    border: 3px solid hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground) / 0.35);
+  }
+
+  /* Headings read better ragged-balanced; body copy avoids orphans. */
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
   }
 }
 
@@ -84,7 +125,43 @@
   }
 
   .tag {
-    @apply inline-flex items-center rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-foreground;
+    @apply inline-flex items-center rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-foreground transition-colors;
+  }
+
+  /* Keyboard-only escape hatch to the main content, visible once focused. */
+  .skip-link {
+    @apply fixed left-4 top-4 z-[100] -translate-y-24 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-lg transition-transform;
+  }
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
+  /* Hairline rule that trails a section heading, Notion-divider style. */
+  .section-rule {
+    @apply h-px flex-1 bg-border;
+  }
+
+  /* Inline text link: underline is the affordance, no colour available. */
+  .link-underline {
+    @apply underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground;
+  }
+
+  /* Clickable suggestion / filter chip. */
+  .chip-button {
+    @apply inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-left text-xs font-medium text-muted-foreground transition-all duration-200;
+  }
+  .chip-button:hover {
+    @apply border-foreground/30 bg-secondary text-foreground;
+  }
+
+  /* Contact / list row that lifts slightly and darkens its rule on hover. */
+  .link-row {
+    @apply flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all duration-200;
+  }
+  .link-row:hover {
+    border-color: hsl(var(--foreground) / 0.3);
+    background: hsl(var(--secondary));
+    transform: translateY(-2px);
   }
 
   .fade-in {
@@ -146,8 +223,9 @@
 @layer components {
   .neural-canvas {
     /* Links top out at 0.32 alpha and nodes pulse down to ~0.20, so the layer
-       has to stay fairly opaque to register at all against pure white. */
-    opacity: 0.5;
+       needs some weight to register against pure white — but it sits behind
+       body copy, so not enough to compete with it. */
+    opacity: 0.4;
     will-change: transform;
   }
 
@@ -336,6 +414,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   .marquee-track,
   .float-slow,
   .type-caret::after {
@@ -343,6 +424,13 @@
   }
   [data-reveal] {
     opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Keep the colour/border feedback on hover, drop the movement. */
+  .elevated-card:hover,
+  .stat-card:hover,
+  .link-row:hover,
+  .elevated-card:hover .capability-icon {
     transform: none !important;
   }
 }
