@@ -84,10 +84,14 @@ const NeuralVisual = () => {
       const ambient = new THREE.AmbientLight(0xffffff, 0.9);
       scene.add(ambient);
 
-      const grid = new THREE.GridHelper(60, 30, 0x7c3aed, 0x2a2a3a);
+      const grid = new THREE.GridHelper(60, 30, 0x000000, 0xb0b0b0);
       grid.position.y = -10;
       scene.add(grid);
       const axes = new THREE.AxesHelper(12);
+      // AxesHelper ships red/green/blue vertex colours; force it to neutral ink.
+      axes.material.vertexColors = false;
+      axes.material.color.setHex(0x333333);
+      axes.material.needsUpdate = true;
       scene.add(axes);
 
       const randn = () => {
@@ -188,7 +192,10 @@ const NeuralVisual = () => {
 
       const positions = new Float32Array(N * 3);
       const colors = new Float32Array(N * 3);
-      const palette = [0x22c55e, 0x3b82f6, 0xf59e0b, 0xef4444];
+      // Monochrome ramp: clusters separate by luminance instead of hue. The page
+      // behind this canvas is pure white, so the ramp has to stay in the dark
+      // half — anything past ~0x9a9a9a washes out against the background.
+      const palette = [0x000000, 0x454545, 0x757575, 0x9a9a9a];
       for (let i = 0; i < N; i++) {
         const p = proj[i];
         positions[i * 3 + 0] = nx(p[0]);
@@ -323,7 +330,7 @@ const NeuralVisual = () => {
   }, []);
 
   return (
-    <div style={{ width: "100%", height: "100vh", position: "relative", background: "radial-gradient(1200px 600px at var(--mouse-x,50%) var(--mouse-y,50%), rgba(74,177,103,0.22), transparent 60%)" }}
+    <div style={{ width: "100%", height: "100vh", position: "relative", background: "radial-gradient(1200px 600px at var(--mouse-x,50%) var(--mouse-y,50%), hsl(0 0% 0% / 0.06), transparent 60%)" }}
       onMouseMove={(e) => {
         const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -375,7 +382,7 @@ const NeuralVisual = () => {
                   }}
                   className={`rounded-md px-3 py-2 text-left text-sm font-medium capitalize transition-all ${
                     activeSection === item
-                      ? "bg-primary/80 text-primary-foreground shadow-[0_0_14px_hsl(var(--primary)/0.45)]"
+                      ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -405,15 +412,15 @@ const NeuralVisual = () => {
           top: 0,
           pointerEvents: "none",
           transform: "translate(-9999px, -9999px)",
-          color: "hsl(142 28% 18%)",
+          color: "hsl(0 0% 0%)",
           padding: "6px 10px",
           borderRadius: 6,
-          border: "1px solid rgba(74,177,103,0.55)",
+          border: "1px solid hsl(0 0% 89%)",
           fontSize: 12,
           opacity: 0,
           transition: "opacity 120ms ease",
-          backgroundColor: "rgba(233,248,230,0.92)",
-          boxShadow: "0 2px 12px rgba(74,177,103,0.25)"
+          backgroundColor: "hsl(0 0% 100% / 0.95)",
+          boxShadow: "0 2px 12px hsl(0 0% 0% / 0.12)"
         }}
       />
     </div>

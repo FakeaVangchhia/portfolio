@@ -77,7 +77,7 @@ const ChatbotPanel = () => {
         <CardTitle className="display-font text-2xl">Ask My AI Assistant</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 h-80 space-y-3 overflow-y-auto rounded-xl border border-border/70 bg-card/80 p-4">
+        <div className="mb-4 h-80 space-y-3 overflow-y-auto rounded-xl border border-border bg-card/80 p-4">
           {messages.map((message, index) => (
             <div
               key={`${message.role}-${index}`}
@@ -111,7 +111,16 @@ const ChatbotPanel = () => {
               Send <Send className="ml-2 h-4 w-4" />
             </Button>
           </div>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {/* Inverted to stay distinguishable from an assistant bubble, which is
+              also grey-on-white in this palette. */}
+          {error && (
+            <p
+              role="alert"
+              className="rounded-lg bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground"
+            >
+              {error}
+            </p>
+          )}
         </form>
       </CardContent>
     </Card>

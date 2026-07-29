@@ -7,26 +7,33 @@
 
 @layer base {
   :root {
-    --background: 108 42% 94%;
-    --foreground: 142 28% 18%;
-    --card: 105 48% 97%;
-    --card-foreground: 142 28% 18%;
-    --popover: 105 48% 97%;
-    --popover-foreground: 142 28% 18%;
-    --primary: 136 44% 42%;
-    --primary-foreground: 110 35% 97%;
-    --secondary: 111 34% 88%;
-    --secondary-foreground: 142 25% 22%;
-    --muted: 110 26% 84%;
-    --muted-foreground: 142 18% 35%;
-    --accent: 152 42% 52%;
-    --accent-foreground: 142 30% 16%;
-    --destructive: 1 82% 61%;
-    --destructive-foreground: 210 33% 97%;
-    --border: 112 24% 73%;
-    --input: 112 24% 73%;
-    --ring: 136 44% 42%;
-    --radius: 0.95rem;
+    /* Notion-style monochrome: pure white paper, pure black ink, neutral greys
+       for hierarchy. No hue anywhere — every token is 0% saturation. */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
+    /* --accent stays a light surface: shadcn uses it for hover/selected rows. */
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 0% 18%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 87%;
+    --input: 0 0% 87%;
+    --ring: 0 0% 0%;
+    --radius: 0.75rem;
+
+    /* Decorative mid-grey for the monochrome gradients (progress bar, headings,
+       timeline, canvas nodes) — the "second colour" of this palette. */
+    --ink-soft: 0 0% 45%;
   }
 
   * {
@@ -40,10 +47,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'IBM Plex Sans', sans-serif;
-    background-image:
-      radial-gradient(circle at 8% 10%, hsl(var(--primary) / 0.2), transparent 36%),
-      radial-gradient(circle at 90% 10%, hsl(var(--accent) / 0.16), transparent 32%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(108 38% 90%) 100%);
+    /* Flat white page — no tinted washes. */
     min-height: 100vh;
   }
 }
@@ -54,7 +58,7 @@
   }
 
   .glass-panel {
-    @apply border border-border/70 bg-card/75 backdrop-blur-xl;
+    @apply border border-border bg-card/85 backdrop-blur-xl;
   }
 
   .section-anchor {
@@ -63,8 +67,8 @@
 
   .hero-grid {
     background-image:
-      linear-gradient(hsl(var(--primary) / 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--primary) / 0.08) 1px, transparent 1px);
+      linear-gradient(hsl(var(--foreground) / 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.055) 1px, transparent 1px);
     background-size: 44px 44px;
     mask-image: radial-gradient(circle at center, black 38%, transparent 84%);
   }
@@ -74,46 +78,32 @@
   }
 
   .elevated-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 38px hsl(120 25% 45% / 0.2);
-    border-color: hsl(var(--primary) / 0.38);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px hsl(var(--foreground) / 0.08);
+    border-color: hsl(var(--foreground) / 0.28);
   }
 
   .tag {
-    @apply inline-flex items-center rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-medium text-primary;
+    @apply inline-flex items-center rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-foreground;
   }
 
   .fade-in {
     animation: fade-in 700ms ease-out both;
   }
 
+  /* Flat "paper" nav bar: hairline border, soft lift, no glow. */
   .neon-nav-shell {
     position: relative;
-    border: 1px solid hsl(var(--primary) / 0.55);
-    background:
-      linear-gradient(135deg, hsl(var(--background) / 0.9), hsl(112 35% 85% / 0.85));
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--background) / 0.85);
     box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.22) inset,
-      0 0 20px hsl(var(--primary) / 0.22),
-      0 18px 35px hsl(120 25% 50% / 0.16);
-  }
-
-  .neon-nav-shell::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(120deg, hsl(var(--primary) / 0.36), transparent 28%, transparent 70%, hsl(var(--primary) / 0.28));
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    padding: 1px;
+      0 1px 2px hsl(var(--foreground) / 0.04),
+      0 8px 24px hsl(var(--foreground) / 0.06);
   }
 
   .neon-tabs {
-    border: 1px solid hsl(var(--primary) / 0.35);
-    background: hsl(108 35% 90% / 0.75);
-    box-shadow: 0 0 12px hsl(var(--primary) / 0.18) inset;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--secondary) / 0.8);
   }
 
   .neon-tab {
@@ -123,14 +113,18 @@
 
   .neon-tab:hover {
     color: hsl(var(--foreground));
+    background: hsl(var(--foreground) / 0.05);
   }
 
   .neon-tab-active {
     color: hsl(var(--primary-foreground));
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.85), hsl(var(--accent) / 0.72));
-    box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.55) inset,
-      0 0 20px hsl(var(--primary) / 0.3);
+    background: hsl(var(--primary));
+    box-shadow: 0 1px 3px hsl(var(--foreground) / 0.2);
+  }
+
+  .neon-tab-active:hover {
+    color: hsl(var(--primary-foreground));
+    background: hsl(var(--primary));
   }
 }
 
@@ -151,7 +145,9 @@
 
 @layer components {
   .neural-canvas {
-    opacity: 0.6;
+    /* Links top out at 0.32 alpha and nodes pulse down to ~0.20, so the layer
+       has to stay fairly opaque to register at all against pure white. */
+    opacity: 0.5;
     will-change: transform;
   }
 
@@ -166,11 +162,10 @@
     transform-origin: 0 50%;
     background: linear-gradient(
       90deg,
-      hsl(var(--primary)),
-      hsl(var(--accent)),
-      hsl(var(--primary))
+      hsl(var(--foreground)),
+      hsl(var(--ink-soft)),
+      hsl(var(--foreground))
     );
-    box-shadow: 0 0 12px hsl(var(--primary) / 0.55);
   }
 
   /* Gradient wordmark used for hero + section headings. */
@@ -178,8 +173,8 @@
     background: linear-gradient(
       120deg,
       hsl(var(--foreground)) 0%,
-      hsl(var(--primary)) 55%,
-      hsl(var(--accent)) 100%
+      hsl(var(--ink-soft)) 55%,
+      hsl(var(--foreground)) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -187,7 +182,7 @@
   }
 
   .section-eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary;
+    @apply inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground;
   }
 
   /* Scroll-reveal system driven by useScrollReveal(). */
@@ -242,11 +237,11 @@
   }
 
   .marquee-chip {
-    @apply inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-primary/25 bg-card/70 px-4 py-2 text-sm font-medium text-foreground/90 backdrop-blur;
+    @apply inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/90 backdrop-blur;
   }
 
   .stat-card {
-    @apply relative overflow-hidden rounded-2xl border border-border/70 bg-card/70 p-6 text-center backdrop-blur-xl transition-all duration-300;
+    @apply relative overflow-hidden rounded-2xl border border-border bg-card p-6 text-center backdrop-blur-xl transition-all duration-300;
   }
   .stat-card::after {
     content: "";
@@ -254,7 +249,7 @@
     inset: 0;
     background: radial-gradient(
       circle at 50% 0%,
-      hsl(var(--primary) / 0.18),
+      hsl(var(--foreground) / 0.05),
       transparent 70%
     );
     opacity: 0;
@@ -262,7 +257,8 @@
   }
   .stat-card:hover {
     transform: translateY(-4px);
-    border-color: hsl(var(--primary) / 0.4);
+    border-color: hsl(var(--foreground) / 0.28);
+    box-shadow: 0 10px 24px hsl(var(--foreground) / 0.07);
   }
   .stat-card:hover::after {
     opacity: 1;
@@ -276,29 +272,31 @@
     height: 1em;
     margin-left: 2px;
     vertical-align: -0.12em;
-    background: hsl(var(--primary));
+    background: hsl(var(--foreground));
     animation: caret-blink 1s steps(1) infinite;
   }
 
   /* Icon tile inside capability cards. */
   .capability-icon {
-    @apply mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary transition-all duration-300;
+    @apply mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-all duration-300;
   }
   .elevated-card:hover .capability-icon {
     transform: translateY(-2px) scale(1.06);
-    box-shadow: 0 0 22px hsl(var(--primary) / 0.35);
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary));
   }
 
   /* Vertical timeline for the process section. */
   .timeline-line {
     background: linear-gradient(
       180deg,
-      hsl(var(--primary) / 0.55),
-      hsl(var(--accent) / 0.2)
+      hsl(var(--foreground) / 0.45),
+      hsl(var(--foreground) / 0.08)
     );
   }
   .timeline-dot {
-    box-shadow: 0 0 0 4px hsl(var(--background)), 0 0 16px hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 0 4px hsl(var(--background)), 0 0 0 5px hsl(var(--border));
   }
 
   /* Ambient floating orbs behind sections. */

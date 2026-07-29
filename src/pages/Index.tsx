@@ -254,7 +254,7 @@ const Index = () => {
                   }}
                   className={`rounded-md px-3 py-2 text-left text-sm font-medium capitalize transition-all ${
                     activeSection === item
-                      ? "bg-primary/80 text-primary-foreground shadow-[0_0_14px_hsl(var(--primary)/0.45)]"
+                      ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -282,8 +282,8 @@ const Index = () => {
           className="section-anchor relative overflow-hidden pb-16 pt-8 md:pb-24"
         >
           <div className="hero-grid pointer-events-none absolute inset-0" />
-          <div className="float-slow pointer-events-none absolute -left-10 top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
-          <div className="float-slow pointer-events-none absolute right-0 top-40 h-52 w-52 rounded-full bg-accent/20 blur-3xl" />
+          <div className="float-slow pointer-events-none absolute -left-10 top-10 h-40 w-40 rounded-full bg-foreground/[0.06] blur-3xl" />
+          <div className="float-slow pointer-events-none absolute right-0 top-40 h-52 w-52 rounded-full bg-foreground/[0.04] blur-3xl" />
 
           <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
             <div data-reveal>
@@ -345,13 +345,13 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-1">
-                  <div className="rounded-xl border border-border/70 bg-card/70 p-4">
+                  <div className="rounded-xl border border-border bg-card/70 p-4">
                     <p className="display-font text-2xl text-primary">95%</p>
                     <p className="text-xs text-muted-foreground">
                       OCR extraction precision
                     </p>
                   </div>
-                  <div className="rounded-xl border border-border/70 bg-card/70 p-4">
+                  <div className="rounded-xl border border-border bg-card/70 p-4">
                     <p className="display-font text-2xl text-primary">30%</p>
                     <p className="text-xs text-muted-foreground">
                       booking uplift on platform work
@@ -564,21 +564,21 @@ const Index = () => {
               <div className="space-y-3">
                 <a
                   href="mailto:fakeavangchhia@gmail.com"
-                  className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
                 >
                   <Mail className="h-5 w-5 text-primary" />
                   <span className="text-sm">fakeavangchhia@gmail.com</span>
                 </a>
                 <a
                   href="tel:8787698473"
-                  className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
                 >
                   <Phone className="h-5 w-5 text-primary" />
                   <span className="text-sm">+91 8787698473</span>
                 </a>
                 <a
                   href="https://www.linkedin.com/in/fakeavangchhia/"
-                  className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card/75 p-4 transition hover:border-primary/40 hover:-translate-y-0.5"
                 >
                   <Linkedin className="h-5 w-5 text-primary" />
                   <span className="text-sm">linkedin.com/in/fakeavangchhia</span>
@@ -597,7 +597,7 @@ const Index = () => {
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Back to top"
-        className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-primary/40 bg-card/80 text-primary shadow-[0_0_18px_hsl(var(--primary)/0.35)] backdrop-blur transition-all duration-300 hover:-translate-y-1 ${
+        className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-[0_4px_16px_hsl(var(--foreground)/0.12)] backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:bg-secondary ${
           showTop ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
         }`}
       >

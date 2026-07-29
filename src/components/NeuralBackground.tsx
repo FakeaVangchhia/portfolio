@@ -28,9 +28,11 @@ const NeuralBackground = () => {
       return;
     }
 
+    // --accent is a light UI surface in this palette, so the field is drawn with
+    // the ink tokens instead: black links, mid-grey nodes.
     const styles = getComputedStyle(document.documentElement);
-    const primary = styles.getPropertyValue("--primary").trim() || "136 44% 42%";
-    const accent = styles.getPropertyValue("--accent").trim() || "152 42% 52%";
+    const primary = styles.getPropertyValue("--primary").trim() || "0 0% 0%";
+    const accent = styles.getPropertyValue("--ink-soft").trim() || "0 0% 45%";
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let width = 0;
