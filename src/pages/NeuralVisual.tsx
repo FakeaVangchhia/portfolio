@@ -2,8 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { buildFeatureSpace, groupLabels } from "@/data/embedding-corpus";
+import { loadThree } from "@/lib/three-loader";
 
-const navItems = ["home", "capabilities", "projects", "assistant", "contact"];
+// Mirrors `navItems` in Index.tsx — these link back to sections on that page.
+const navItems = [
+  "home",
+  "capabilities",
+  "experience",
+  "projects",
+  "assistant",
+  "contact",
+];
 
 // Must match the `palette` used for the point colours below.
 const legendSwatches = ["#000000", "#5a5a5a", "#9a9a9a"];
@@ -12,6 +21,9 @@ const NeuralVisual = () => {
   // No portfolio section is active here — this is its own route, so the section
   // tabs stay unhighlighted and "Neural Vision" carries aria-current instead.
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // three.js comes from a CDN, so "no scene" is a reachable state that needs to
+  // say something rather than leave an empty box.
+  const [loadFailed, setLoadFailed] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
 
@@ -64,29 +76,14 @@ const NeuralVisual = () => {
     let theta = Math.PI / 4;
     let phi = Math.PI / 4;
 
-    const ensureScript = (src: string) => {
-      return new Promise<void>((resolve, reject) => {
-        const existing = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement | null;
-        if (existing && (existing as any)._loaded) {
-          resolve();
-          return;
-        }
-        const script = existing ?? document.createElement("script");
-        script.src = src;
-        script.async = true;
-        const onLoad = () => {
-          (script as any)._loaded = true;
-          resolve();
-        };
-        script.addEventListener("load", onLoad, { once: true });
-        script.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
-        if (!existing) document.head.appendChild(script);
-      });
-    };
-
     const init = async () => {
-      await ensureScript("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js");
-      const THREE: any = (window as any).THREE;
+      let THREE: any;
+      try {
+        THREE = await loadThree();
+      } catch {
+        setLoadFailed(true);
+        return;
+      }
       if (!THREE || !containerRef.current) return;
 
       const width = containerRef.current.clientWidth || window.innerWidth;
@@ -444,6 +441,24 @@ const NeuralVisual = () => {
       </nav>
 
       <div ref={containerRef} style={{ width: "100%", height: "100%", paddingTop: "92px" }} />
+
+      {loadFailed && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center px-6">
+          <div className="glass-panel max-w-md rounded-2xl p-8 text-center">
+            <h1 className="display-font text-xl font-semibold tracking-tight">
+              The 3D view could not load
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              This page fetches three.js from a CDN at runtime, and that request
+              failed — usually an offline connection or a blocked CDN. Everything
+              else on the portfolio works without it.
+            </p>
+            <Button onClick={() => goToSection("projects")} className="mt-6 rounded-full px-6">
+              Back to projects
+            </Button>
+          </div>
+        </div>
+      )}
 
       <aside className="glass-panel pointer-events-none absolute bottom-6 left-6 z-40 hidden max-w-xs rounded-2xl p-5 md:block">
         <h1 className="display-font text-lg font-semibold tracking-tight">

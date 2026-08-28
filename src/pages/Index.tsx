@@ -8,7 +8,9 @@ import {
   Cpu,
   Database,
   ExternalLink,
+  FileText,
   FlaskConical,
+  GraduationCap,
   Linkedin,
   Mail,
   Phone,
@@ -21,15 +23,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChatbotPanel from "@/components/ChatbotPanel";
 import NeuralBackground from "@/components/NeuralBackground";
+import ScrollNeuralScene from "@/components/ScrollNeuralScene";
 import TypingRoles from "@/components/TypingRoles";
-import { projectItems, techStack } from "@/data/portfolio";
+import {
+  education,
+  experience,
+  projectItems,
+  publication,
+  techStack,
+} from "@/data/portfolio";
 import {
   useCountUp,
   useScrollProgress,
   useScrollReveal,
 } from "@/hooks/use-scroll-reveal";
 
-const navItems = ["home", "capabilities", "projects", "assistant", "contact"];
+const navItems = [
+  "home",
+  "capabilities",
+  "experience",
+  "projects",
+  "assistant",
+  "contact",
+];
 
 const heroRoles = [
   "LLM-powered products.",
@@ -40,9 +56,10 @@ const heroRoles = [
 
 const stats = [
   { value: 95, suffix: "%", label: "OCR extraction precision" },
+  { value: 40, suffix: "%", label: "faster real-time extraction" },
   { value: 30, suffix: "%", label: "booking uplift delivered" },
-  { value: 3, suffix: "", label: "production platforms shipped" },
-  { value: 6, suffix: "+", label: "core technologies mastered" },
+  // Derived, so the claim cannot drift away from the toolbox actually listed.
+  { value: techStack.length, suffix: "+", label: "technologies in production use" },
 ];
 
 const capabilityItems = [
@@ -452,6 +469,133 @@ const Index = () => {
           </ul>
         </section>
 
+        {/* Experience */}
+        <section
+          id="experience"
+          className="section-anchor py-12 md:py-16"
+          aria-labelledby="experience-heading"
+        >
+          <div className="mb-8" data-reveal>
+            <p className="section-eyebrow mb-3">Career</p>
+            <div className="flex items-center gap-5">
+              <h2
+                id="experience-heading"
+                className="display-font text-3xl font-semibold tracking-tight md:text-4xl"
+              >
+                Experience
+              </h2>
+              <span className="section-rule" aria-hidden="true" />
+            </div>
+          </div>
+
+          {/* The rule is drawn once behind the whole list rather than per-item,
+              so it reads as one continuous spine. */}
+          <ol className="relative ml-1 space-y-6 pl-8">
+            <span
+              className="timeline-line absolute bottom-2 left-0 top-2 w-px"
+              aria-hidden="true"
+            />
+            {experience.map((role, i) => (
+              <li
+                key={`${role.company}-${role.period}`}
+                className="relative"
+                data-reveal="left"
+                style={{ ["--reveal-delay" as string]: `${i * 120}ms` }}
+              >
+                <span
+                  className="timeline-dot absolute -left-8 top-6 h-2.5 w-2.5 translate-x-[-3px] rounded-full bg-primary"
+                  aria-hidden="true"
+                />
+                <Card className="glass-panel elevated-card">
+                  <CardContent className="p-6">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h3 className="display-font text-xl font-medium leading-snug">
+                        {role.title}
+                        <span className="text-muted-foreground"> · {role.company}</span>
+                      </h3>
+                      <p className="flex items-center gap-2 text-sm tabular-nums text-muted-foreground">
+                        {role.period}
+                        {role.current && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                            Now
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <ul className="mt-4 space-y-2">
+                      {role.highlights.map((highlight) => (
+                        <li
+                          key={highlight}
+                          className="flex gap-3 text-sm leading-relaxed text-muted-foreground"
+                        >
+                          <span
+                            className="mt-[0.55rem] h-1 w-1 shrink-0 rounded-full bg-muted-foreground"
+                            aria-hidden="true"
+                          />
+                          {highlight}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </li>
+            ))}
+          </ol>
+
+          {/* Education + publication: the credentials a recruiter scans for. */}
+          <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <Card className="glass-panel elevated-card" data-reveal>
+              <CardContent className="p-6">
+                <span className="capability-icon">
+                  <GraduationCap className="h-6 w-6" />
+                </span>
+                <h3 className="display-font mb-4 text-lg font-medium">Education</h3>
+                <ul className="space-y-4">
+                  {education.map((item) => (
+                    <li key={item.qualification}>
+                      <p className="font-medium">
+                        {item.qualification}
+                        <span className="text-muted-foreground">
+                          {" "}
+                          · {item.institution}
+                        </span>
+                      </p>
+                      <p className="text-sm tabular-nums text-muted-foreground">
+                        {item.period} · {item.detail}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="glass-panel elevated-card"
+              data-reveal
+              style={{ ["--reveal-delay" as string]: "120ms" }}
+            >
+              <CardContent className="p-6">
+                <span className="capability-icon">
+                  <FileText className="h-6 w-6" />
+                </span>
+                <h3 className="display-font mb-4 text-lg font-medium">Publication</h3>
+                <p className="text-sm leading-relaxed">{publication.title}</p>
+                <a
+                  href={publication.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-underline mt-3 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Read it on {publication.venue}
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
         {/* Projects */}
         <section
           id="projects"
@@ -538,6 +682,8 @@ const Index = () => {
             ))}
           </div>
         </section>
+
+        <ScrollNeuralScene />
 
         {/* AI Assistant */}
         <section

@@ -34,15 +34,22 @@ catch-all.
 
 ### Content lives in `src/pages/Index.tsx`
 
-`Index.tsx` (~600 lines) is the whole site. Portfolio copy is hardcoded in
-module-level arrays at the top of the file — `navItems`, `stats`,
-`capabilityItems`, `processSteps`, `suggestedQuestions`. Editing portfolio
-content means editing those arrays, not chasing a CMS. `navItems` doubles as the
-scroll-spy list, so each entry must match a section's `id`.
+`Index.tsx` is the whole site. Portfolio copy is hardcoded in module-level
+arrays at the top of the file — `navItems`, `stats`, `capabilityItems`,
+`processSteps`, `suggestedQuestions`. Editing portfolio content means editing
+those arrays, not chasing a CMS. `navItems` doubles as the scroll-spy list, so
+each entry must match a section's `id`, **and `NeuralVisual.tsx` keeps its own
+copy of `navItems`** to link back — change one, change both.
 
-Two arrays live in `src/data/portfolio.ts` instead, because `NeuralVisual` also
-consumes them: `techStack` and `projectItems`. Edit them there — a second copy
-would silently desynchronise the 3D page from the site it claims to describe.
+The rest lives in `src/data/portfolio.ts`, because `NeuralVisual` also consumes
+some of it: `techStack`, `projectItems`, `experience`, `education`, and
+`publication`. Edit them there — a second copy would silently desynchronise the
+3D page from the site it claims to describe.
+
+`experience` / `education` / `publication` mirror `public/resume.pdf`, and
+`backend/knowledge.py` restates the same facts for the assistant. The PDF is the
+authority: three places now assert Fakea's work history, and a recruiter reading
+the resume next to the site will notice if they disagree.
 
 Cross-page navigation back to a section uses a hash: `/neural_visual` calls
 `navigate({ pathname: "/", hash: "#projects" })`, and `Index` has a `location.hash`
@@ -92,12 +99,31 @@ nearby neighbours, with pointer attraction and scroll parallax. It reads `--prim
 and `--ink-soft` off `getComputedStyle(document.documentElement)`, so it follows the
 theme automatically.
 
-### `NeuralVisual.tsx` — three.js from CDN
+### three.js comes from a CDN
 
-This page loads three.js at runtime by injecting a `<script>` tag pointing at
-jsDelivr, then reads `window.THREE`. three.js is **not** an npm dependency and
-everything is typed `any`. It needs network access to render, and the imperative
-setup/teardown all lives inside one `useEffect`.
+`src/lib/three-loader.ts` owns loading it: one script tag, one module-scoped
+promise, shared by both consumers. three.js is **not** an npm dependency, so
+there are no types — the loader exports `Three` (an aliased `any`) as the single
+documented escape hatch, and callers import that rather than spelling `any`.
+
+Two consequences that every three.js change has to respect:
+
+- **It can fail.** No network, blocked CDN, no WebGL context. Both consumers
+  render a message instead of an empty box; keep that path working.
+- **Colour tokens need converting.** Tailwind stores HSL channels
+  space-separated (`0 0% 45%`). three.js's colour parser only accepts the legacy
+  comma form and, on a miss, silently leaves the colour **white** — invisible on
+  this white page. `ScrollNeuralScene`'s `readInk` does the conversion.
+
+`NeuralVisual.tsx` is the full 3D page: imperative setup/teardown in one
+`useEffect`, everything typed `any`.
+
+`ScrollNeuralScene.tsx` is the scroll-driven scene on the home page. It only
+loads three.js once an IntersectionObserver says the section is near, so a
+visitor who never scrolls that far never pays the ~600KB. Under
+`prefers-reduced-motion` it draws exactly one settled frame and starts no loop.
+Unlike `NeuralVisual`, **it plots nothing real** — it is a generic MLP diagram,
+and the copy beside it says so on purpose.
 
 **Everything it plots is real.** The scene used to scatter 240 random Gaussian
 vectors labelled `animals_0`/`tech_57`; it now projects the actual portfolio:
@@ -129,16 +155,25 @@ than hand-writing them. Most of the ~50 components there are unused by the pages
 ## Backend integration
 
 `ChatbotPanel.tsx` POSTs to `${VITE_API_BASE_URL ?? "http://localhost:8000"}/assistant/chat`
-with `{ model: "gemini-2.0-flash", messages: [{role, content}, ...] }` and reads
-`data.answer` (errors come back as `data.detail`). The system prompt is a constant
-in that file. Set `VITE_API_BASE_URL` for deployed environments.
+with `{ model, messages: [{role, content}, ...] }` and reads `data.answer`
+(errors come back as `data.detail`). Set `VITE_API_BASE_URL` for deployed
+environments — Vite inlines it **at build time**, so changing it needs a rebuild.
+
+The prompt and the API key are deliberately **not** in the frontend. The server
+owns `knowledge.SYSTEM_PROMPT`, and `routers/assistant.py` discards any `system`
+turn the browser sends — a prompt shipped to the client is a prompt anyone can
+rewrite in devtools.
 
 The FastAPI backend lives at `../backend` and is **outside this git repository**
-(the repo root is `frontend/`). Note that `backend/main.py` as checked out only
-registers `/`; the `/assistant/chat` router the frontend calls is not wired up
-there, so the chatbot fails locally until the backend serves that route.
+(the repo root is `frontend/`), which also means it is not deployable as-is. See
+`../DEPLOYMENT.md`.
 
-## Known breakage
+## Deployment artefacts
 
-`src/pages/Resume.tsx` iframes `/My Resume.pdf`, but `public/` only contains
-`resume.pdf` — the `/resume` route 404s inside the iframe.
+- `vercel.json` and `public/_redirects` are the SPA fallback for Vercel and
+  Netlify/Cloudflare. Without them `/resume` and `/neural_visual` 404 on a hard
+  refresh, because only in-app navigation ever creates those routes.
+- `index.html` hardcodes `https://www.fakeavangchhia.online/` in the canonical
+  tag, `og:url`, `og:image`, and the JSON-LD `Person` block; `public/sitemap.xml`
+  repeats it. A domain change means editing both.
+- `public/og-image.png` is the 1200x630 social card.

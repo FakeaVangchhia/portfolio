@@ -11,10 +11,12 @@ type Message = {
   content: string;
 };
 
-const SYSTEM_PROMPT =
-  "You are Fakea Vangchhia's portfolio assistant. Keep replies concise, professional, and focused on AI engineering, backend, and project work.";
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+
+// The model is named here only so the backend can reject anything off its
+// allowlist; the prompt and the API key live server-side in `backend/knowledge.py`
+// and are deliberately not shipped to the browser.
+const MODEL = "gemini-2.0-flash";
 
 type ChatbotPanelProps = {
   /** A suggestion clicked elsewhere on the page, dropped into the composer. */
@@ -74,15 +76,19 @@ const ChatbotPanel = ({ pendingQuestion, onPendingQuestionUsed }: ChatbotPanelPr
       const response = await fetch(`${API_BASE_URL}/assistant/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gemini-2.0-flash",
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...updatedMessages],
-        }),
+        body: JSON.stringify({ model: MODEL, messages: updatedMessages }),
       });
 
-      const data = await response.json();
+      // A cold-started or missing backend can answer with HTML or nothing at
+      // all, and `.json()` would then throw something unreadable at the visitor.
+      const data = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(data?.detail || "Request failed");
+        throw new Error(
+          data?.detail ||
+            (response.status === 503
+              ? "The assistant is not configured on the server yet."
+              : `The assistant is unavailable right now (${response.status}).`),
+        );
       }
 
       const assistantMessage: Message = {
@@ -92,7 +98,14 @@ const ChatbotPanel = ({ pendingQuestion, onPendingQuestionUsed }: ChatbotPanelPr
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (submitError) {
-      const message = submitError instanceof Error ? submitError.message : "Unexpected error";
+      // `fetch` rejects with a bare "Failed to fetch" when the API is asleep or
+      // unreachable, which tells a visitor nothing. Say what to do instead.
+      const message =
+        submitError instanceof TypeError
+          ? "Could not reach the assistant. It may be waking up — try again, or email fakeavangchhia@gmail.com."
+          : submitError instanceof Error
+            ? submitError.message
+            : "Unexpected error";
       setError(message);
     } finally {
       setLoading(false);

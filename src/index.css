@@ -52,6 +52,14 @@
     font-family: 'IBM Plex Sans', sans-serif;
     /* Flat white page — no tinted washes. */
     min-height: 100vh;
+    /* Reveal variants translate elements up to 38px sideways before they
+       settle. On a phone that pushes past the viewport edge and the page picks
+       up a horizontal scrollbar for content which is about to slide into place
+       anyway. `clip` suppresses it without turning body into a scroll
+       container, which is what `hidden` would do; the declaration above is the
+       fallback for browsers that do not know `clip`. */
+    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* A flat monochrome design strips away the usual affordances, so the keyboard
