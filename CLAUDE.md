@@ -159,10 +159,20 @@ with `{ model, messages: [{role, content}, ...] }` and reads `data.answer`
 (errors come back as `data.detail`). Set `VITE_API_BASE_URL` for deployed
 environments — Vite inlines it **at build time**, so changing it needs a rebuild.
 
-The prompt and the API key are deliberately **not** in the frontend. The server
-owns `knowledge.SYSTEM_PROMPT`, and `routers/assistant.py` discards any `system`
-turn the browser sends — a prompt shipped to the client is a prompt anyone can
-rewrite in devtools.
+`model` is `"flint"` — a LoRA fine-tune of Gemma 4 E4B on Fakea's own answers,
+served from a scale-to-zero GPU on Modal (`backend/serving/modal_flint.py`). The
+FastAPI backend is a proxy in front of it. There is no fallback model.
+
+The prompt and the service token are deliberately **not** in the frontend.
+`routers/assistant.py` discards any `system` turn the browser sends and does not
+send one of its own — flint was trained against a single fixed prompt that the
+Modal service supplies itself.
+
+Two things in the panel exist only because the GPU sleeps: a fire-and-forget
+`GET /assistant/health` on mount, which wakes a container while the visitor is
+still reading, and a "waking the model" label that replaces "Thinking..." after
+eight seconds. A cold start is genuinely ~30–60s; without the second one it reads
+as a hang.
 
 The FastAPI backend lives at `../backend` and is **outside this git repository**
 (the repo root is `frontend/`), which also means it is not deployable as-is. See

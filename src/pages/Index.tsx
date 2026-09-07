@@ -703,9 +703,11 @@ const Index = () => {
                 Talk to my AI assistant
               </h2>
               <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">
-                Instead of reading a static bio, ask a question. This assistant is
-                wired to a live LLM backend and answers about my projects, skills,
-                and experience — a small showcase of the kind of AI features I build.
+                Instead of reading a static bio, ask a question. The answers come
+                from flint — a Gemma 4 model I fine-tuned on my own writing, served
+                from a GPU that spins up on demand. Not a wrapper around someone
+                else's API: the weights, the training data, and the serving stack
+                are all mine.
               </p>
               <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Try asking

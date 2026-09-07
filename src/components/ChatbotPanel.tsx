@@ -13,10 +13,15 @@ type Message = {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
-// The model is named here only so the backend can reject anything off its
-// allowlist; the prompt and the API key live server-side in `backend/knowledge.py`
-// and are deliberately not shipped to the browser.
-const MODEL = "gemini-2.0-flash";
+// flint: a LoRA fine-tune of Gemma 4 E4B trained on Fakea's own answers, served
+// from a scale-to-zero GPU. The model is named here only so the backend can
+// reject anything off its allowlist; the system prompt and the service token
+// live server-side and are deliberately not shipped to the browser.
+const MODEL = "flint";
+
+// flint sleeps when nobody is chatting, and waking it means loading ~15 GB of
+// weights. After this long, "Thinking..." has stopped being an honest label.
+const COLD_START_NOTICE_MS = 8000;
 
 type ChatbotPanelProps = {
   /** A suggestion clicked elsewhere on the page, dropped into the composer. */
@@ -28,16 +33,35 @@ const ChatbotPanel = ({ pendingQuestion, onPendingQuestionUsed }: ChatbotPanelPr
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi, I'm your AI assistant. Ask me anything about my projects, skills, or experience.",
+      content: "Hi, I'm flint — Fakea's fine-tuned assistant. Ask me about his projects, skills, or experience.",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [waking, setWaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const transcriptRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
+
+  // Wake the model while the visitor is still reading the page. The backend's
+  // health check pings the GPU service, which starts a container booting, so a
+  // question asked thirty seconds from now lands on a warm one instead of
+  // paying the cold start. Fire-and-forget: nothing here is worth an error.
+  useEffect(() => {
+    void fetch(`${API_BASE_URL}/assistant/health`).catch(() => undefined);
+  }, []);
+
+  // Swap the "Thinking..." label once a wait stops looking like thinking.
+  useEffect(() => {
+    if (!loading) {
+      setWaking(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setWaking(true), COLD_START_NOTICE_MS);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   // Keep the newest message in view instead of leaving it below the fold.
   useEffect(() => {
@@ -128,7 +152,10 @@ const ChatbotPanel = ({ pendingQuestion, onPendingQuestionUsed }: ChatbotPanelPr
   return (
     <Card className="glass-panel elevated-card">
       <CardHeader>
-        <CardTitle className="display-font text-2xl">Ask My AI Assistant</CardTitle>
+        <CardTitle className="display-font text-2xl">Ask flint</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          My fine-tune of Gemma 4 E4B, trained on my own answers.
+        </p>
       </CardHeader>
       <CardContent>
         <div
@@ -141,7 +168,10 @@ const ChatbotPanel = ({ pendingQuestion, onPendingQuestionUsed }: ChatbotPanelPr
           {messages.map((message, index) => (
             <div
               key={`${message.role}-${index}`}
-              className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
+              // whitespace-pre-wrap, because the system prompt allows the
+              // assistant short bullet lists on technical questions and this is
+              // a plain text node -- without it every line collapses into one.
+              className={`max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm leading-relaxed ${
                 message.role === "user"
                   ? "ml-auto bg-primary text-primary-foreground"
                   : "bg-secondary text-foreground"
@@ -155,7 +185,10 @@ const ChatbotPanel = ({ pendingQuestion, onPendingQuestionUsed }: ChatbotPanelPr
           ))}
           {loading && (
             <div className="inline-flex items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Thinking...
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />{" "}
+              {waking
+                ? "Waking the model — the first question after a quiet spell takes about a minute."
+                : "Thinking..."}
             </div>
           )}
         </div>
