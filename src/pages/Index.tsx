@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Linkedin,
   Mail,
+  PartyPopper,
   Phone,
   Rocket,
   Sparkles,
@@ -21,6 +22,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import BirthdayConfetti from "@/components/BirthdayConfetti";
 import ChatbotPanel from "@/components/ChatbotPanel";
 import NeuralBackground from "@/components/NeuralBackground";
 import ScrollNeuralScene from "@/components/ScrollNeuralScene";
@@ -37,6 +39,7 @@ import {
   useScrollProgress,
   useScrollReveal,
 } from "@/hooks/use-scroll-reveal";
+import { BIRTHDAY, isBirthdayMode, popConfetti } from "@/lib/birthday";
 
 const navItems = [
   "home",
@@ -45,6 +48,29 @@ const navItems = [
   "projects",
   "assistant",
   "contact",
+];
+
+// Resolved once: `applyBirthdayMode()` in main.tsx has already set the class.
+const birthdayMode = isBirthdayMode();
+
+const BIRTHDAY_LABEL = new Date(2000, BIRTHDAY.month - 1, BIRTHDAY.day)
+  .toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+
+const wishSubject = encodeURIComponent("Happy Birthday, Fakea! 🎂");
+const wishBody = encodeURIComponent(
+  "Hi Fakea,\n\nHappy birthday! Hope your day is full of cake and green CI pipelines.\n\n",
+);
+const wishHref = `mailto:fakeavangchhia@gmail.com?subject=${wishSubject}&body=${wishBody}`;
+
+// Pennant count for the garland; more flags than the widest hero needs, the
+// container clips the overflow.
+const buntingFlags = Array.from({ length: 34 }, (_, i) => i);
+
+const balloons = [
+  { emoji: "🎈", className: "-left-2 bottom-2 md:left-0", delay: "0ms" },
+  { emoji: "🎈", className: "right-4 top-16 md:right-12", delay: "1200ms" },
+  { emoji: "🎁", className: "left-[42%] top-8 hidden md:block", delay: "2400ms" },
+  { emoji: "🎉", className: "bottom-10 right-2 md:right-6", delay: "800ms" },
 ];
 
 const heroRoles = [
@@ -220,6 +246,7 @@ const Index = () => {
         aria-hidden="true"
       />
       <NeuralBackground />
+      {birthdayMode && <BirthdayConfetti />}
 
       <nav
         aria-label="Primary"
@@ -231,6 +258,11 @@ const Index = () => {
             className="display-font rounded-md text-lg font-semibold tracking-tight text-primary"
           >
             Fakea Vangchhia
+            {birthdayMode && (
+              <span className="cake-wiggle ml-2" role="img" aria-label="birthday cake">
+                🎂
+              </span>
+            )}
           </button>
 
           <div className="neon-tabs hidden items-center gap-1 rounded-full p-1 md:flex">
@@ -308,11 +340,41 @@ const Index = () => {
           <div className="float-slow pointer-events-none absolute -left-10 top-10 h-40 w-40 rounded-full bg-foreground/[0.06] blur-3xl" />
           <div className="float-slow pointer-events-none absolute right-0 top-40 h-52 w-52 rounded-full bg-foreground/[0.04] blur-3xl" />
 
+          {birthdayMode && (
+            <>
+              <div className="bunting" aria-hidden="true">
+                {buntingFlags.map((i) => (
+                  <span
+                    key={i}
+                    className="bunting-flag"
+                    style={{ ["--flag-delay" as string]: `${(i % 6) * 180}ms` }}
+                  />
+                ))}
+              </div>
+              {balloons.map((balloon, i) => (
+                <span
+                  key={i}
+                  className={`balloon ${balloon.className}`}
+                  style={{ ["--balloon-delay" as string]: balloon.delay }}
+                  aria-hidden="true"
+                >
+                  {balloon.emoji}
+                </span>
+              ))}
+            </>
+          )}
+
           <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
             <div data-reveal>
-              <p className="section-eyebrow mb-5">
-                <Sparkles className="h-3.5 w-3.5" /> AI Engineer Portfolio
-              </p>
+              {birthdayMode ? (
+                <p className="section-eyebrow birthday-eyebrow mb-5">
+                  <PartyPopper className="h-3.5 w-3.5" /> Birthday edition · {BIRTHDAY_LABEL}
+                </p>
+              ) : (
+                <p className="section-eyebrow mb-5">
+                  <Sparkles className="h-3.5 w-3.5" /> AI Engineer Portfolio
+                </p>
+              )}
               <h1 className="display-font mb-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
                 Building dependable
                 <span className="gradient-text"> AI products</span>, not just demos.
@@ -342,6 +404,43 @@ const Index = () => {
                   Let&apos;s Collaborate
                 </Button>
               </div>
+
+              {birthdayMode && (
+                <div className="birthday-card mt-8 rounded-2xl p-5" data-reveal>
+                  <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="display-font text-lg font-semibold">
+                        <span className="cake-wiggle mr-2" role="img" aria-label="birthday cake">
+                          🎂
+                        </span>
+                        It&apos;s my birthday today!
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        The site is wearing its party colours for the day. Pop some
+                        confetti, or drop me a wish — both are appreciated.
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                      <Button
+                        onClick={(event) => {
+                          const rect = event.currentTarget.getBoundingClientRect();
+                          popConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                        }}
+                        className="party-button rounded-full px-5"
+                      >
+                        <PartyPopper className="h-4 w-4" />
+                        Pop confetti
+                      </Button>
+                      <a href={wishHref}>
+                        <Button variant="outline" className="rounded-full px-5">
+                          Send a wish
+                          <Mail className="ml-1 h-4 w-4" />
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <Card className="glass-panel elevated-card" data-reveal="right">
@@ -456,7 +555,7 @@ const Index = () => {
             <div className="marquee-track">
               {[...techStack, ...techStack].map((tech, i) => (
                 <span key={`${tech}-${i}`} className="marquee-chip">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  <span className="marquee-dot h-1.5 w-1.5 rounded-full bg-primary" />
                   {tech}
                 </span>
               ))}
@@ -800,7 +899,11 @@ const Index = () => {
       <footer className="border-t border-border">
         <div className="container flex flex-col items-center justify-between gap-3 py-8 text-xs text-muted-foreground sm:flex-row">
           <p>© 2026 Lalfakawma Vangchhia</p>
-          <p>Built with React, Tailwind &amp; a little neural flair.</p>
+          <p>
+            {birthdayMode
+              ? "Built with React, Tailwind & a slice of birthday cake. 🎂"
+              : "Built with React, Tailwind & a little neural flair."}
+          </p>
         </div>
       </footer>
 

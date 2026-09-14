@@ -73,6 +73,16 @@ monochrome gradients (scroll progress bar, `gradient-text`, timeline) and by
 `darkMode: ["class"]` is configured but **no dark palette exists** — there is only
 one `:root` block, no `.dark` overrides.
 
+**Birthday mode** is the one palette swap that does exist. `src/lib/birthday.ts`
+puts a `birthday` class on `<html>` on 15 September (or with `?birthday=1`;
+`?birthday=0` silences it), and `:root.birthday` in `index.css` overrides every
+token — cream paper, plum ink, hot-pink primary, lavender `--ink-soft` — plus six
+`--party-*` confetti colours. `main.tsx` calls `applyBirthdayMode()` **before**
+render because the canvas backdrops sample the palette once at mount. Everything
+day-specific (bunting, balloons, the hero card, `BirthdayConfetti.tsx`, the tab
+title's 🎂) is gated on `isBirthdayMode()` in `Index.tsx`/`App.tsx` or scoped under
+`.birthday` in CSS, so the monochrome site is untouched on the other 364 days.
+
 Beyond Tailwind, `src/index.css` defines the site's custom component classes under
 `@layer components`: `glass-panel`, `elevated-card`, `neon-nav-shell`/`neon-tab`,
 `stat-card`, `capability-icon`, `marquee`/`marquee-chip`, `gradient-text`,

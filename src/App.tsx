@@ -8,10 +8,11 @@ import Index from "./pages/Index";
 import Resume from "./pages/Resume";
 import NotFound from "./pages/NotFound";
 import NeuralVisual from "./pages/NeuralVisual";
+import { isBirthdayMode } from "./lib/birthday";
 
 const queryClient = new QueryClient();
 
-const BASE_TITLE = "Fakea Vangchhia · AI Engineer";
+const BASE_TITLE = `${isBirthdayMode() ? "🎂 " : ""}Fakea Vangchhia · AI Engineer`;
 
 const ROUTE_TITLES: Record<string, string> = {
   "/": BASE_TITLE,
