@@ -18,14 +18,7 @@ type Piece = {
   ambient: boolean;
 };
 
-const PALETTE_TOKENS = [
-  "--party-pink",
-  "--party-gold",
-  "--party-sky",
-  "--party-mint",
-  "--party-lavender",
-  "--party-coral",
-];
+const PALETTE_TOKENS = ["--party-pink", "--party-gold", "--party-rose"];
 
 const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
 

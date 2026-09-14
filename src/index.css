@@ -38,8 +38,9 @@
 
   /* Birthday mode (see src/lib/birthday.ts): `applyBirthdayMode()` puts the
      `birthday` class on <html> on 15 September and the whole palette swaps —
-     warm cream paper, deep plum ink, hot-pink primary, lavender as the second
-     colour. Every component below that only makes sense on the day is scoped
+     warm cream paper, deep plum ink, hot-pink primary, gold as the second
+     colour. Deliberately two-tone: a wider spread reads as a pride rainbow,
+     not a birthday. Every component that only makes sense on the day is scoped
      under `.birthday` too, so removing the class restores the monochrome site
      without touching anything else. */
   :root.birthday {
@@ -62,15 +63,13 @@
     --border: 335 45% 87%;
     --input: 335 45% 87%;
     --ring: 335 85% 52%;
-    --ink-soft: 265 75% 62%;
+    --ink-soft: 350 70% 62%;
 
-    /* Confetti colours, shared by the canvas layer, bunting and gradients. */
+    /* Party colours, shared by the canvas layer, bunting and gradients: pink,
+       gold, and a soft rose so the confetti is not just two flat tones. */
     --party-pink: 335 85% 55%;
     --party-gold: 42 95% 55%;
-    --party-sky: 195 85% 52%;
-    --party-mint: 150 60% 48%;
-    --party-lavender: 265 75% 65%;
-    --party-coral: 15 90% 62%;
+    --party-rose: 350 80% 74%;
   }
 
   * {
@@ -469,9 +468,8 @@
   /* Body gets a faint warm wash so the cream reads as paper, not off-white. */
   .birthday body {
     background-image:
-      radial-gradient(60% 40% at 8% 0%, hsl(var(--party-pink) / 0.12), transparent 70%),
-      radial-gradient(50% 35% at 95% 5%, hsl(var(--party-sky) / 0.12), transparent 70%),
-      radial-gradient(45% 30% at 50% 100%, hsl(var(--party-gold) / 0.1), transparent 70%);
+      radial-gradient(60% 40% at 8% 0%, hsl(var(--party-pink) / 0.1), transparent 70%),
+      radial-gradient(50% 35% at 95% 5%, hsl(var(--party-gold) / 0.12), transparent 70%);
     background-attachment: fixed;
   }
 
@@ -483,20 +481,14 @@
     opacity: 0.9;
   }
 
-  /* Party gradient shared by the progress bar, active tab, icon tiles, dots. */
+  /* Pink-to-gold gradient shared by the progress bar, icon tiles and dots. */
   .birthday .scroll-progress,
-  .birthday .neon-tab-active,
-  .birthday .neon-tab-active:hover,
   .birthday .elevated-card:hover .capability-icon,
   .birthday .timeline-dot {
     background: linear-gradient(
       90deg,
       hsl(var(--party-pink)),
-      hsl(var(--party-coral)),
-      hsl(var(--party-gold)),
-      hsl(var(--party-mint)),
-      hsl(var(--party-sky)),
-      hsl(var(--party-lavender))
+      hsl(var(--party-gold))
     );
   }
   .birthday .neon-tab-active {
@@ -511,9 +503,8 @@
     background: linear-gradient(
       120deg,
       hsl(var(--party-pink)) 0%,
-      hsl(var(--party-coral)) 30%,
-      hsl(var(--party-lavender)) 65%,
-      hsl(195 85% 42%) 100%
+      hsl(350 80% 62%) 50%,
+      hsl(var(--party-pink)) 100%
     );
     background-size: 200% 100%;
     -webkit-background-clip: text;
@@ -526,8 +517,7 @@
     background: linear-gradient(
       180deg,
       hsl(var(--party-pink)),
-      hsl(var(--party-gold)),
-      hsl(var(--party-sky) / 0.2)
+      hsl(var(--party-gold) / 0.15)
     );
   }
 
@@ -551,7 +541,7 @@
   .birthday .neon-nav-shell {
     box-shadow:
       0 1px 2px hsl(var(--party-pink) / 0.08),
-      0 8px 24px hsl(var(--party-lavender) / 0.14);
+      0 8px 24px hsl(var(--party-pink) / 0.1);
   }
 
   /* Pennant garland hung across the top of the hero. Each flag is a
@@ -575,12 +565,9 @@
     animation: flag-sway 3.2s ease-in-out infinite;
     animation-delay: var(--flag-delay, 0ms);
   }
-  .bunting-flag:nth-child(6n + 1) { background: hsl(var(--party-pink)); }
-  .bunting-flag:nth-child(6n + 2) { background: hsl(var(--party-gold)); }
-  .bunting-flag:nth-child(6n + 3) { background: hsl(var(--party-sky)); }
-  .bunting-flag:nth-child(6n + 4) { background: hsl(var(--party-mint)); }
-  .bunting-flag:nth-child(6n + 5) { background: hsl(var(--party-lavender)); }
-  .bunting-flag:nth-child(6n + 6) { background: hsl(var(--party-coral)); }
+  .bunting-flag:nth-child(3n + 1) { background: hsl(var(--party-pink)); }
+  .bunting-flag:nth-child(3n + 2) { background: hsl(var(--party-gold)); }
+  .bunting-flag:nth-child(3n + 3) { background: hsl(var(--party-rose)); }
 
   /* Emoji balloons drifting up the sides of the hero. */
   .balloon {
@@ -603,13 +590,7 @@
     border: 1px solid transparent;
     background:
       linear-gradient(135deg, hsl(var(--card) / 0.94), hsl(var(--card) / 0.94)) padding-box,
-      linear-gradient(
-        135deg,
-        hsl(var(--party-pink)),
-        hsl(var(--party-gold)),
-        hsl(var(--party-sky)),
-        hsl(var(--party-lavender))
-      ) border-box;
+      linear-gradient(135deg, hsl(var(--party-pink)), hsl(var(--party-gold))) border-box;
     box-shadow: 0 14px 34px hsl(var(--party-pink) / 0.16);
   }
   .birthday-card::before {
@@ -618,7 +599,7 @@
     inset: 0;
     background:
       radial-gradient(circle at 10% 10%, hsl(var(--party-gold) / 0.22), transparent 40%),
-      radial-gradient(circle at 90% 90%, hsl(var(--party-sky) / 0.2), transparent 40%);
+      radial-gradient(circle at 90% 90%, hsl(var(--party-pink) / 0.14), transparent 40%);
     pointer-events: none;
   }
 
@@ -639,7 +620,7 @@
     background: linear-gradient(
       100deg,
       hsl(var(--party-pink)),
-      hsl(var(--party-coral)) 55%,
+      hsl(350 80% 58%) 55%,
       hsl(var(--party-gold))
     );
     background-size: 160% 100%;

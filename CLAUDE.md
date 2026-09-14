@@ -76,8 +76,9 @@ one `:root` block, no `.dark` overrides.
 **Birthday mode** is the one palette swap that does exist. `src/lib/birthday.ts`
 puts a `birthday` class on `<html>` on 15 September (or with `?birthday=1`;
 `?birthday=0` silences it), and `:root.birthday` in `index.css` overrides every
-token — cream paper, plum ink, hot-pink primary, lavender `--ink-soft` — plus six
-`--party-*` confetti colours. `main.tsx` calls `applyBirthdayMode()` **before**
+token — cream paper, plum ink, hot-pink primary, rose `--ink-soft` — plus three
+`--party-*` colours (pink, gold, rose). It is deliberately two-tone: a wider
+spread of hues reads as a pride rainbow rather than a birthday. `main.tsx` calls `applyBirthdayMode()` **before**
 render because the canvas backdrops sample the palette once at mount. Everything
 day-specific (bunting, balloons, the hero card, `BirthdayConfetti.tsx`, the tab
 title's 🎂) is gated on `isBirthdayMode()` in `Index.tsx`/`App.tsx` or scoped under
