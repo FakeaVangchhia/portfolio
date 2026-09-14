@@ -12,13 +12,13 @@ type Piece = {
   rot: number;
   vrot: number;
   color: string;
-  shape: "rect" | "circle" | "ribbon";
+  shape: "rect" | "circle" | "ribbon" | "sparkle";
   /** Bursts fade out; the ambient drizzle is immortal and recycles at the top. */
   life: number;
   ambient: boolean;
 };
 
-const PALETTE_TOKENS = ["--party-pink", "--party-gold", "--party-rose"];
+const PALETTE_TOKENS = ["--party-gold", "--party-champagne", "--party-bronze"];
 
 const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
 
@@ -26,7 +26,8 @@ const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)]
  * Fixed full-viewport confetti layer for birthday mode: a light ambient drizzle
  * of pieces tumbling down the page, plus bursts fired by `popConfetti()` via a
  * window event. Reads the `--party-*` tokens off the document so the colours
- * stay in step with the palette. Under `prefers-reduced-motion` it scatters one
+ * stay in step with the palette; a `sparkle` shape twinkles so the gold reads
+ * as foil rather than paper. Under `prefers-reduced-motion` it scatters one
  * settled frame and runs no loop, and bursts are ignored.
  */
 const BirthdayConfetti = () => {
@@ -43,7 +44,7 @@ const BirthdayConfetti = () => {
     const styles = getComputedStyle(document.documentElement);
     const colors = PALETTE_TOKENS.map((token) => {
       const hsl = styles.getPropertyValue(token).trim();
-      return hsl ? `hsl(${hsl})` : "hsl(335 85% 55%)";
+      return hsl ? `hsl(${hsl})` : "hsl(42 90% 56%)";
     });
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -65,7 +66,7 @@ const BirthdayConfetti = () => {
         rot: Math.random() * Math.PI * 2,
         vrot: (Math.random() - 0.5) * 0.08,
         color: pick(colors),
-        shape: pick(["rect", "rect", "circle", "ribbon"] as Piece["shape"][]),
+        shape: pick(["rect", "rect", "circle", "ribbon", "sparkle"] as Piece["shape"][]),
         life: 1,
         ambient,
       };
@@ -103,7 +104,21 @@ const BirthdayConfetti = () => {
       ctx.rotate(piece.rot);
       ctx.globalAlpha = piece.ambient ? 0.85 : Math.max(0, piece.life);
       ctx.fillStyle = piece.color;
-      if (piece.shape === "circle") {
+      // Gold foil catches light: every piece gets a soft halo.
+      ctx.shadowColor = piece.color;
+      ctx.shadowBlur = piece.shape === "sparkle" ? 10 : 4;
+      if (piece.shape === "sparkle") {
+        // Four-point star that twinkles by scaling with its rotation.
+        const r = piece.w * (0.7 + 0.3 * Math.sin(piece.rot * 3));
+        ctx.beginPath();
+        for (let k = 0; k < 8; k++) {
+          const radius = k % 2 === 0 ? r : r * 0.32;
+          const angle = (k / 8) * Math.PI * 2;
+          ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+        }
+        ctx.closePath();
+        ctx.fill();
+      } else if (piece.shape === "circle") {
         ctx.beginPath();
         ctx.arc(0, 0, piece.w / 2, 0, Math.PI * 2);
         ctx.fill();

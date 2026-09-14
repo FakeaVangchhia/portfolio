@@ -37,39 +37,41 @@
   }
 
   /* Birthday mode (see src/lib/birthday.ts): `applyBirthdayMode()` puts the
-     `birthday` class on <html> on 15 September and the whole palette swaps —
-     warm cream paper, deep plum ink, hot-pink primary, gold as the second
-     colour. Deliberately two-tone: a wider spread reads as a pride rainbow,
-     not a birthday. Every component that only makes sense on the day is scoped
-     under `.birthday` too, so removing the class restores the monochrome site
-     without touching anything else. */
+     `birthday` class on <html> on 15 September and the whole palette swaps to
+     a black-tie edition — near-black paper, warm ivory ink, gold primary,
+     champagne as the second colour. Two hues only, on purpose: black and gold
+     reads as exclusive; a spread of hues reads as a rainbow. Every component
+     that only makes sense on the day is scoped under `.birthday` too, so
+     removing the class restores the monochrome site without touching anything
+     else. This is the only dark palette in the codebase. */
   :root.birthday {
-    --background: 40 70% 98%;
-    --foreground: 290 45% 12%;
-    --card: 0 0% 100%;
-    --card-foreground: 290 45% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 290 45% 12%;
-    --primary: 335 85% 52%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 340 80% 96%;
-    --secondary-foreground: 290 45% 12%;
-    --muted: 340 45% 95%;
-    --muted-foreground: 290 18% 40%;
-    --accent: 45 100% 92%;
-    --accent-foreground: 290 45% 12%;
-    --destructive: 0 75% 50%;
+    --background: 240 12% 5%;
+    --foreground: 40 30% 94%;
+    --card: 240 10% 8%;
+    --card-foreground: 40 30% 94%;
+    --popover: 240 10% 8%;
+    --popover-foreground: 40 30% 94%;
+    --primary: 42 90% 56%;
+    --primary-foreground: 240 15% 6%;
+    --secondary: 240 8% 12%;
+    --secondary-foreground: 40 30% 94%;
+    --muted: 240 8% 12%;
+    --muted-foreground: 40 12% 66%;
+    /* Dark-gold surface: shadcn hover rows glow faintly instead of going grey. */
+    --accent: 42 45% 16%;
+    --accent-foreground: 42 90% 70%;
+    --destructive: 0 70% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 335 45% 87%;
-    --input: 335 45% 87%;
-    --ring: 335 85% 52%;
-    --ink-soft: 350 70% 62%;
+    --border: 42 35% 22%;
+    --input: 42 35% 22%;
+    --ring: 42 90% 56%;
+    --ink-soft: 45 85% 72%;
 
-    /* Party colours, shared by the canvas layer, bunting and gradients: pink,
-       gold, and a soft rose so the confetti is not just two flat tones. */
-    --party-pink: 335 85% 55%;
-    --party-gold: 42 95% 55%;
-    --party-rose: 350 80% 74%;
+    /* Party colours, shared by the canvas layer, bunting and gradients:
+       gold, pale champagne, and a deeper bronze for depth. */
+    --party-gold: 42 90% 56%;
+    --party-champagne: 46 90% 78%;
+    --party-bronze: 32 70% 42%;
   }
 
   * {
@@ -111,7 +113,8 @@
     color: hsl(var(--foreground));
   }
   .birthday ::selection {
-    background: hsl(var(--party-gold) / 0.45);
+    background: hsl(var(--party-gold) / 0.35);
+    color: hsl(var(--foreground));
   }
 
   ::-webkit-scrollbar {
@@ -461,91 +464,215 @@
 }
 
 /* ------------------------------------------------------------------ */
-/*  Birthday mode — everything here is scoped under `.birthday`         */
+/*  Birthday mode — black & gold. Everything here is scoped `.birthday` */
 /* ------------------------------------------------------------------ */
 
 @layer components {
-  /* Body gets a faint warm wash so the cream reads as paper, not off-white. */
+  /* Stage lighting: a warm key light from the top, a cooler bronze fill from
+     the bottom corner, and a vignette so the edges fall away into black. */
   .birthday body {
     background-image:
-      radial-gradient(60% 40% at 8% 0%, hsl(var(--party-pink) / 0.1), transparent 70%),
-      radial-gradient(50% 35% at 95% 5%, hsl(var(--party-gold) / 0.12), transparent 70%);
+      radial-gradient(70% 45% at 50% -8%, hsl(var(--party-gold) / 0.22), transparent 70%),
+      radial-gradient(40% 30% at 100% 100%, hsl(var(--party-bronze) / 0.16), transparent 70%),
+      radial-gradient(120% 90% at 50% 50%, transparent 55%, hsl(240 15% 2% / 0.7) 100%);
     background-attachment: fixed;
   }
 
   .birthday .neural-canvas {
-    opacity: 0.28;
+    opacity: 0.32;
   }
 
   .confetti-canvas {
-    opacity: 0.9;
+    opacity: 0.95;
   }
 
-  /* Pink-to-gold gradient shared by the progress bar, icon tiles and dots. */
+  /* Fine gold grain over the hero grid, so the dark surface has texture. */
+  .birthday .hero-grid {
+    background-image:
+      linear-gradient(hsl(var(--party-gold) / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--party-gold) / 0.08) 1px, transparent 1px);
+  }
+
+  /* Hero "ultra lighting": one large breathing spotlight from above, and two
+     slow rotating light sweeps (conic gradients masked to a soft disc) that
+     rake across the headline like stage beams. All decorative, all behind
+     the copy. */
+  .hero-light {
+    position: absolute;
+    inset: -20% -10%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .hero-light-glow {
+    position: absolute;
+    left: 50%;
+    top: -10%;
+    width: 120%;
+    height: 90%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      50% 60% at 50% 0%,
+      hsl(var(--party-champagne) / 0.28),
+      hsl(var(--party-gold) / 0.12) 40%,
+      transparent 75%
+    );
+    animation: light-breathe 6s ease-in-out infinite;
+  }
+  .hero-light-beam {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 140vmax;
+    height: 140vmax;
+    margin: -70vmax 0 0 -70vmax;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      hsl(var(--party-gold) / 0.14) 12deg,
+      transparent 26deg,
+      transparent 180deg,
+      hsl(var(--party-champagne) / 0.1) 194deg,
+      transparent 210deg,
+      transparent 360deg
+    );
+    mask-image: radial-gradient(circle at center, black 0%, transparent 42%);
+    -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 42%);
+    animation: light-sweep 38s linear infinite;
+    opacity: 0.9;
+  }
+  .hero-light-beam.is-reverse {
+    animation-duration: 54s;
+    animation-direction: reverse;
+    opacity: 0.6;
+  }
+
+  /* Gold gradient shared by the progress bar, icon tiles and timeline dots. */
   .birthday .scroll-progress,
   .birthday .elevated-card:hover .capability-icon,
   .birthday .timeline-dot {
     background: linear-gradient(
       90deg,
-      hsl(var(--party-pink)),
+      hsl(var(--party-bronze)),
+      hsl(var(--party-gold)) 45%,
+      hsl(var(--party-champagne)) 75%,
       hsl(var(--party-gold))
     );
   }
-  .birthday .neon-tab-active {
-    box-shadow: 0 2px 10px hsl(var(--party-pink) / 0.35);
+  .birthday .scroll-progress {
+    box-shadow: 0 0 12px hsl(var(--party-gold) / 0.7);
+  }
+  .birthday .timeline-dot {
+    box-shadow:
+      0 0 0 4px hsl(var(--background)),
+      0 0 0 5px hsl(var(--party-gold) / 0.5),
+      0 0 16px hsl(var(--party-gold) / 0.5);
   }
   .birthday .elevated-card:hover .capability-icon {
     border-color: transparent;
+    box-shadow: 0 0 22px hsl(var(--party-gold) / 0.45);
   }
 
-  /* No gold in the text gradient: it drops below 3:1 against the cream. */
+  /* Metallic headline: bronze → gold → champagne highlight → gold, with the
+     highlight sweeping across slowly, like light moving over gilt lettering. */
   .birthday .gradient-text {
     background: linear-gradient(
-      120deg,
-      hsl(var(--party-pink)) 0%,
-      hsl(350 80% 62%) 50%,
-      hsl(var(--party-pink)) 100%
+      100deg,
+      hsl(var(--party-bronze)) 0%,
+      hsl(var(--party-gold)) 30%,
+      hsl(var(--party-champagne)) 50%,
+      hsl(var(--party-gold)) 70%,
+      hsl(var(--party-bronze)) 100%
     );
-    background-size: 200% 100%;
+    background-size: 220% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: party-shimmer 6s ease-in-out infinite;
+    animation: gilt-sweep 7s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px hsl(var(--party-gold) / 0.25));
   }
 
   .birthday .timeline-line {
     background: linear-gradient(
       180deg,
-      hsl(var(--party-pink)),
-      hsl(var(--party-gold) / 0.15)
+      hsl(var(--party-gold)),
+      hsl(var(--party-gold) / 0.12)
     );
   }
 
+  /* Cards: hairline gold border, a lit top edge, and a gold glow on hover. */
+  .birthday .glass-panel,
+  .birthday .stat-card,
+  .birthday .link-row,
+  .birthday .marquee-chip {
+    box-shadow: inset 0 1px 0 hsl(var(--party-champagne) / 0.14);
+  }
   .birthday .stat-card::after {
     background: radial-gradient(
       circle at 50% 0%,
-      hsl(var(--party-pink) / 0.16),
+      hsl(var(--party-gold) / 0.22),
       transparent 70%
     );
   }
   .birthday .stat-card:hover,
   .birthday .elevated-card:hover {
-    box-shadow: 0 12px 28px hsl(var(--party-pink) / 0.16);
-    border-color: hsl(var(--party-pink) / 0.45);
+    border-color: hsl(var(--party-gold) / 0.6);
+    box-shadow:
+      inset 0 1px 0 hsl(var(--party-champagne) / 0.25),
+      0 14px 40px hsl(240 15% 0% / 0.6),
+      0 0 30px hsl(var(--party-gold) / 0.18);
+  }
+  .birthday .link-row:hover {
+    border-color: hsl(var(--party-gold) / 0.6);
+    box-shadow: 0 0 22px hsl(var(--party-gold) / 0.16);
   }
 
   .birthday .marquee-dot {
     background: hsl(var(--party-gold));
+    box-shadow: 0 0 8px hsl(var(--party-gold) / 0.8);
   }
 
+  /* Nav: dark glass with a gold hairline and a lit top edge. */
   .birthday .neon-nav-shell {
+    border-color: hsl(var(--party-gold) / 0.35);
+    background: hsl(var(--background) / 0.7);
     box-shadow:
-      0 1px 2px hsl(var(--party-pink) / 0.08),
-      0 8px 24px hsl(var(--party-pink) / 0.1);
+      inset 0 1px 0 hsl(var(--party-champagne) / 0.2),
+      0 1px 2px hsl(0 0% 0% / 0.4),
+      0 12px 32px hsl(0 0% 0% / 0.5),
+      0 0 40px hsl(var(--party-gold) / 0.08);
+  }
+  .birthday .neon-tab-active {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--party-champagne)),
+      hsl(var(--party-gold))
+    );
+    box-shadow: 0 2px 14px hsl(var(--party-gold) / 0.45);
+  }
+  .birthday .neon-tab-active:hover {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--party-champagne)),
+      hsl(var(--party-gold))
+    );
+  }
+
+  /* Gilt wordmark in the nav. */
+  .birthday .wordmark {
+    background: linear-gradient(
+      100deg,
+      hsl(var(--party-gold)),
+      hsl(var(--party-champagne)) 50%,
+      hsl(var(--party-gold))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* Pennant garland hung across the top of the hero. Each flag is a
-     clip-path triangle; the string is the container's top border. */
+     clip-path triangle with a satin sheen; the string is the container's
+     top border. */
   .bunting {
     position: absolute;
     left: -2%;
@@ -553,7 +680,8 @@
     top: 0;
     display: flex;
     justify-content: space-between;
-    border-top: 2px solid hsl(var(--foreground) / 0.25);
+    border-top: 1.5px solid hsl(var(--party-gold) / 0.55);
+    box-shadow: 0 0 10px hsl(var(--party-gold) / 0.35);
     pointer-events: none;
   }
   .bunting-flag {
@@ -564,49 +692,63 @@
     transform-origin: 50% 0;
     animation: flag-sway 3.2s ease-in-out infinite;
     animation-delay: var(--flag-delay, 0ms);
+    background-image: linear-gradient(
+      160deg,
+      hsl(var(--party-champagne) / 0.9) 0%,
+      transparent 45%,
+      hsl(0 0% 0% / 0.25) 100%
+    );
   }
-  .bunting-flag:nth-child(3n + 1) { background: hsl(var(--party-pink)); }
-  .bunting-flag:nth-child(3n + 2) { background: hsl(var(--party-gold)); }
-  .bunting-flag:nth-child(3n + 3) { background: hsl(var(--party-rose)); }
+  .bunting-flag:nth-child(3n + 1) { background-color: hsl(var(--party-gold)); }
+  .bunting-flag:nth-child(3n + 2) { background-color: hsl(var(--party-bronze)); }
+  .bunting-flag:nth-child(3n + 3) { background-color: hsl(var(--party-champagne)); }
 
-  /* Emoji balloons drifting up the sides of the hero. */
+  /* Emoji ornaments drifting around the hero, lit with a gold halo. */
   .balloon {
     position: absolute;
     font-size: 2.4rem;
     line-height: 1;
-    opacity: 0.85;
-    filter: drop-shadow(0 6px 10px hsl(var(--party-pink) / 0.25));
+    opacity: 0.9;
+    filter: drop-shadow(0 0 14px hsl(var(--party-gold) / 0.55));
     animation: balloon-drift 7s ease-in-out infinite;
     animation-delay: var(--balloon-delay, 0ms);
     pointer-events: none;
     user-select: none;
   }
 
-  /* "It's my birthday" card in the hero: gradient hairline border via the
-     padding-box / border-box double background trick. */
+  /* "It's my birthday" card: dark glass, gold hairline via the padding-box /
+     border-box double background trick, and a champagne glow in the corner. */
   .birthday-card {
     position: relative;
     overflow: hidden;
     border: 1px solid transparent;
     background:
-      linear-gradient(135deg, hsl(var(--card) / 0.94), hsl(var(--card) / 0.94)) padding-box,
-      linear-gradient(135deg, hsl(var(--party-pink)), hsl(var(--party-gold))) border-box;
-    box-shadow: 0 14px 34px hsl(var(--party-pink) / 0.16);
+      linear-gradient(135deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.92)) padding-box,
+      linear-gradient(
+        135deg,
+        hsl(var(--party-gold)),
+        hsl(var(--party-champagne)) 40%,
+        hsl(var(--party-bronze))
+      ) border-box;
+    box-shadow:
+      0 20px 50px hsl(0 0% 0% / 0.55),
+      0 0 40px hsl(var(--party-gold) / 0.16);
   }
   .birthday-card::before {
     content: "";
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 10% 10%, hsl(var(--party-gold) / 0.22), transparent 40%),
-      radial-gradient(circle at 90% 90%, hsl(var(--party-pink) / 0.14), transparent 40%);
+      radial-gradient(circle at 8% 0%, hsl(var(--party-gold) / 0.28), transparent 42%),
+      radial-gradient(circle at 100% 100%, hsl(var(--party-bronze) / 0.25), transparent 40%);
     pointer-events: none;
   }
 
   .birthday-eyebrow {
-    border-color: hsl(var(--party-pink) / 0.4);
-    background: hsl(var(--party-pink) / 0.1);
-    color: hsl(var(--party-pink));
+    border-color: hsl(var(--party-gold) / 0.5);
+    background: hsl(var(--party-gold) / 0.1);
+    color: hsl(var(--party-gold));
+    box-shadow: 0 0 18px hsl(var(--party-gold) / 0.18);
   }
 
   .cake-wiggle {
@@ -615,27 +757,63 @@
     transform-origin: 50% 90%;
   }
 
-  /* Party-coloured primary button: gradient fill, brightens on hover. */
+  /* Gold primary button: metallic gradient, dark text, and a glow that
+     brightens on hover. */
   .party-button {
     background: linear-gradient(
       100deg,
-      hsl(var(--party-pink)),
-      hsl(350 80% 58%) 55%,
+      hsl(var(--party-gold)),
+      hsl(var(--party-champagne)) 50%,
       hsl(var(--party-gold))
     );
-    background-size: 160% 100%;
+    background-size: 200% 100%;
     color: hsl(var(--primary-foreground));
-    box-shadow: 0 6px 18px hsl(var(--party-pink) / 0.35);
-    transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.4),
+      0 6px 22px hsl(var(--party-gold) / 0.35);
+    transition: background-position 0.5s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
   .party-button:hover {
     background-position: 100% 0;
     transform: translateY(-1px);
-    box-shadow: 0 10px 24px hsl(var(--party-pink) / 0.42);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.5),
+      0 10px 30px hsl(var(--party-gold) / 0.5);
+  }
+
+  /* Default buttons pick up the same metallic treatment for the day. */
+  .birthday .bg-primary {
+    background-image: linear-gradient(
+      180deg,
+      hsl(var(--party-champagne)),
+      hsl(var(--party-gold))
+    );
+    box-shadow: 0 4px 16px hsl(var(--party-gold) / 0.3);
   }
 }
 
-@keyframes party-shimmer {
+@keyframes light-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.06);
+  }
+}
+
+@keyframes light-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gilt-sweep {
   0%,
   100% {
     background-position: 0% 50%;
@@ -694,6 +872,8 @@
   .bunting-flag,
   .balloon,
   .cake-wiggle,
+  .hero-light-glow,
+  .hero-light-beam,
   .birthday .gradient-text {
     animation: none !important;
   }

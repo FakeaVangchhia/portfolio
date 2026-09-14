@@ -32,7 +32,7 @@ export function applyBirthdayMode(): boolean {
   if (on) {
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", "#fdf8f2");
+      ?.setAttribute("content", "#0b0b10");
   }
   return on;
 }

@@ -70,19 +70,23 @@ surface (94%) because shadcn uses it for hover/selected rows, so it is useless f
 decoration; the extra `--ink-soft` (45%) token is the "second colour" used by the
 monochrome gradients (scroll progress bar, `gradient-text`, timeline) and by
 `NeuralBackground`'s node fill.
-`darkMode: ["class"]` is configured but **no dark palette exists** — there is only
-one `:root` block, no `.dark` overrides.
+`darkMode: ["class"]` is configured but there is **no `.dark` palette** — the
+only other palette is birthday mode, below.
 
-**Birthday mode** is the one palette swap that does exist. `src/lib/birthday.ts`
-puts a `birthday` class on `<html>` on 15 September (or with `?birthday=1`;
+**Birthday mode** is a black-and-gold dark palette. `src/lib/birthday.ts` puts a
+`birthday` class on `<html>` on 15 September (or with `?birthday=1`;
 `?birthday=0` silences it), and `:root.birthday` in `index.css` overrides every
-token — cream paper, plum ink, hot-pink primary, rose `--ink-soft` — plus three
-`--party-*` colours (pink, gold, rose). It is deliberately two-tone: a wider
-spread of hues reads as a pride rainbow rather than a birthday. `main.tsx` calls `applyBirthdayMode()` **before**
-render because the canvas backdrops sample the palette once at mount. Everything
-day-specific (bunting, balloons, the hero card, `BirthdayConfetti.tsx`, the tab
-title's 🎂) is gated on `isBirthdayMode()` in `Index.tsx`/`App.tsx` or scoped under
+token — near-black paper, ivory ink, gold primary, champagne `--ink-soft`, a
+dark-gold `--accent` — plus three `--party-*` colours (gold, champagne, bronze).
+It is deliberately two-hue: black and gold reads as exclusive, a spread of hues
+reads as a rainbow, which Fakea explicitly did not want. `main.tsx` calls
+`applyBirthdayMode()` **before** render because the canvas backdrops sample the
+palette once at mount. Everything day-specific (the `hero-light` stage-lighting
+layer, bunting, ornaments, the hero card, `BirthdayConfetti.tsx`, the tab title's
+🎂) is gated on `isBirthdayMode()` in `Index.tsx`/`App.tsx` or scoped under
 `.birthday` in CSS, so the monochrome site is untouched on the other 364 days.
+Because this is the only dark surface, any new component must stay on semantic
+tokens — a hard-coded `bg-white` will glare on the day.
 
 Beyond Tailwind, `src/index.css` defines the site's custom component classes under
 `@layer components`: `glass-panel`, `elevated-card`, `neon-nav-shell`/`neon-tab`,

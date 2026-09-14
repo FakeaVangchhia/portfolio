@@ -67,8 +67,8 @@ const wishHref = `mailto:fakeavangchhia@gmail.com?subject=${wishSubject}&body=${
 const buntingFlags = Array.from({ length: 34 }, (_, i) => i);
 
 const balloons = [
-  { emoji: "🎈", className: "-left-2 bottom-2 md:left-0", delay: "0ms" },
-  { emoji: "🎈", className: "right-4 top-16 md:right-12", delay: "1200ms" },
+  { emoji: "🥂", className: "-left-2 bottom-2 md:left-0", delay: "0ms" },
+  { emoji: "✨", className: "right-4 top-16 md:right-12", delay: "1200ms" },
   { emoji: "🎁", className: "left-[42%] top-8 hidden md:block", delay: "2400ms" },
   { emoji: "🎉", className: "bottom-10 right-2 md:right-6", delay: "800ms" },
 ];
@@ -257,7 +257,7 @@ const Index = () => {
             onClick={() => scrollToSection("home")}
             className="display-font rounded-md text-lg font-semibold tracking-tight text-primary"
           >
-            Fakea Vangchhia
+            <span className={birthdayMode ? "wordmark" : undefined}>Fakea Vangchhia</span>
             {birthdayMode && (
               <span className="cake-wiggle ml-2" role="img" aria-label="birthday cake">
                 🎂
@@ -342,6 +342,11 @@ const Index = () => {
 
           {birthdayMode && (
             <>
+              <div className="hero-light" aria-hidden="true">
+                <div className="hero-light-glow" />
+                <div className="hero-light-beam" />
+                <div className="hero-light-beam is-reverse" />
+              </div>
               <div className="bunting" aria-hidden="true">
                 {buntingFlags.map((i) => (
                   <span
@@ -368,7 +373,7 @@ const Index = () => {
             <div data-reveal>
               {birthdayMode ? (
                 <p className="section-eyebrow birthday-eyebrow mb-5">
-                  <PartyPopper className="h-3.5 w-3.5" /> Birthday edition · {BIRTHDAY_LABEL}
+                  <PartyPopper className="h-3.5 w-3.5" /> Black &amp; gold edition · {BIRTHDAY_LABEL}
                 </p>
               ) : (
                 <p className="section-eyebrow mb-5">
@@ -416,7 +421,7 @@ const Index = () => {
                         It&apos;s my birthday today!
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        The site is wearing its party colours for the day. Pop some
+                        The site is in black tie for the day. Pop some gold
                         confetti, or drop me a wish — both are appreciated.
                       </p>
                     </div>
